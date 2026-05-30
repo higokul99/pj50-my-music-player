@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Library, Settings } from 'lucide-react';
+import { Home, Compass, Heart, Library, Settings, Download } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -33,6 +33,10 @@ const Sidebar: React.FC = () => {
         <Link to="/playlists" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/playlists' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
           <Library size={20} color={location.pathname === '/playlists' ? 'var(--neon-blue)' : 'currentColor'} />
           Playlists
+        </Link>
+        <Link to="/downloads" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/downloads' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+          <Download size={20} color={location.pathname === '/downloads' ? 'var(--neon-blue)' : 'currentColor'} />
+          Downloads
         </Link>
         <Link to="/admin/upload" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/upload' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s', marginTop: '1rem' }}>
           <Settings size={20} />

@@ -43,6 +43,7 @@
 | title | varchar |
 | artist_id | bigint |
 | album_id | bigint |
+| user_id | bigint (FK to users) |
 | file_path | varchar |
 | duration | integer |
 | file_size | bigint |

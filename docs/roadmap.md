@@ -1,34 +1,31 @@
 # MusiqSphere Roadmap
 
-## Phase 1 - MVP
+## Phase 1 - MVP (Completed)
 
-- User Authentication
-- Upload Songs
+- User Authentication (Laravel Sanctum)
+- Upload Songs (Metadata extraction)
 - Stream Songs
-- Search Songs
+- Search Songs (Global & My Songs)
+- Personalized Dashboard (User Stats)
 
-## Phase 2
+## Phase 2 - Advanced Features (In Progress)
 
-- Playlists
-- Favorites
-- Playback History
-- Artist Pages
+- Playlists (Completed)
+- Favorites (Completed)
+- Song Management (Edit/Delete) (Completed)
+- Global Discovery & Song Cloning (Completed)
+- Offline Downloads (Web implementation done)
 
-## Phase 3
+## Phase 3 - Mobile & Notifications
 
-- Offline Downloads
+- Flutter Mobile App (In Development)
 - Push Notifications
 - Background Playback
+- Offline Playback (Mobile)
 
-## Phase 4
+## Phase 4 - Social & Intelligence
 
 - Lyrics
-- Recommendations
+- Recommendations (AI)
 - Smart Playlists
-
-## Phase 5
-
-- Podcasts
-- Audiobooks
-- Social Sharing
-- Collaborative Playlists
+- User Profiles & Sharing

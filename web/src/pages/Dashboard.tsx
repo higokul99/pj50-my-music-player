@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Play, Music, Heart, ListPlus, Mic2, Disc, Library, Loader2 } from 'lucide-react';
+import { Play, Music, Heart, ListPlus, Mic2, Library, Loader2, Download, CheckCircle, User } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ const Dashboard: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist } = usePlayer();
+  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded } = usePlayer();
   const { user } = useAuth();
   
   const observer = useRef<IntersectionObserver | null>(null);
@@ -28,11 +28,24 @@ const Dashboard: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.get(`/songs?page=${pageNum}`);
-      const newData = response.data.data.data;
-      const meta = response.data.data.meta;
+      
+      // Safety check for response structure
+      const responseData = response.data.data;
+      if (!responseData || !responseData.data) {
+        console.error('Unexpected response structure:', response.data);
+        setHasMore(false);
+        return;
+      }
+
+      const newData = responseData.data;
+      const meta = responseData.meta;
       
       setSongs(prevSongs => {
-        // Avoid duplicates if fetch happens twice
+        // If it's page 1, we might want to replace the whole list
+        if (pageNum === 1) {
+          return newData;
+        }
+        // Avoid duplicates
         const combined = [...prevSongs, ...newData];
         return Array.from(new Map(combined.map(item => [item.id, item])).values());
       });
@@ -40,6 +53,7 @@ const Dashboard: React.FC = () => {
       setHasMore(meta.current_page < meta.last_page);
     } catch (error) {
       console.error('Failed to fetch songs', error);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -74,21 +88,27 @@ const Dashboard: React.FC = () => {
           
           <div className="hero-stats">
             <div className="stat-item">
-              <Music size={20} className="stat-icon purple" />
+              <div className="stat-icon-wrapper purple">
+                <Music size={24} />
+              </div>
               <div>
                 <span className="stat-value">{songs.length}</span>
                 <span className="stat-label">Tracks</span>
               </div>
             </div>
             <div className="stat-item">
-              <Mic2 size={20} className="stat-icon blue" />
+              <div className="stat-icon-wrapper blue">
+                <User size={24} />
+              </div>
               <div>
                 <span className="stat-value">{new Set(songs.map(s => s.artist_id)).size}</span>
                 <span className="stat-label">Artists</span>
               </div>
             </div>
             <div className="stat-item">
-              <Disc size={20} className="stat-icon pink" />
+              <div className="stat-icon-wrapper pink">
+                <Library size={24} />
+              </div>
               <div>
                 <span className="stat-value">{new Set(songs.map(s => s.album_id)).size}</span>
                 <span className="stat-label">Albums</span>
@@ -118,52 +138,67 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="songs-list-container">
-          {songs.map((song, index) => (
-            <div 
-              key={song.id} 
-              ref={index === songs.length - 1 ? lastSongElementRef : null}
-              className={`song-list-item glass-card ${currentSong?.id === song.id ? 'active' : ''}`}
-              onClick={() => playSong(song, songs)}
-            >
-              <div className="song-prefix">
-                {currentSong?.id === song.id && isPlaying ? (
-                  <div className="mini-visualizer-bars">
-                    <span></span><span></span><span></span>
-                  </div>
-                ) : (
-                  <span className="index-number">{index + 1}</span>
-                )}
-              </div>
+          {songs.length > 0 ? (
+            songs.map((song, index) => (
+              <div 
+                key={song.id} 
+                ref={index === songs.length - 1 ? lastSongElementRef : null}
+                className={`song-list-item glass-card ${currentSong?.id === song.id ? 'active' : ''}`}
+                onClick={() => playSong(song, songs)}
+              >
+                <div className="song-prefix">
+                  {currentSong?.id === song.id && isPlaying ? (
+                    <div className="mini-visualizer-bars">
+                      <span></span><span></span><span></span>
+                    </div>
+                  ) : (
+                    <span className="index-number">{index + 1}</span>
+                  )}
+                </div>
 
-              <div className="song-artwork-mini">
-                {song.cover_image ? (
-                  <img src={`http://localhost:8000${song.cover_image}`} alt="" />
-                ) : (
-                  <Music size={20} opacity={0.3} />
-                )}
-              </div>
+                <div className="song-artwork-mini">
+                  {song.cover_image ? (
+                    <img src={`http://localhost:8000${song.cover_image}`} alt="" />
+                  ) : (
+                    <Music size={20} opacity={0.3} />
+                  )}
+                </div>
 
-              <div className="song-details-mini">
-                <h3 className="song-title-mini">{song.title}</h3>
-                <p className="song-artist-mini">{song.artist?.name || 'Unknown Artist'}</p>
-              </div>
+                <div className="song-details-mini">
+                  <h3 className="song-title-mini">{song.title}</h3>
+                  <p className="song-artist-mini">{song.artist?.name || 'Unknown Artist'}</p>
+                </div>
 
-              <div className="song-actions-mini">
-                <button
-                  onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}
-                  className="action-icon-btn"
+                <div className="song-actions-mini">
+                  <button
+                  onClick={(e) => { e.stopPropagation(); downloadSong(song); }}
+                  className={`action-icon-btn ${isDownloaded(song.id) ? 'downloaded' : ''}`}
+                  title={isDownloaded(song.id) ? "Downloaded" : "Download for offline"}
+                  disabled={isDownloaded(song.id)}
                 >
-                  <ListPlus size={20} />
-                </button>
-                <button
-                  onClick={(e) => handleToggleFavorite(e, song.id)}
-                  className={`action-icon-btn ${song.is_favorite ? 'favorited' : ''}`}
-                >
-                  <Heart size={20} fill={song.is_favorite ? 'var(--neon-pink)' : 'none'} />
-                </button>
+                    {isDownloaded(song.id) ? <CheckCircle size={20} color="var(--neon-blue)" /> : <Download size={20} />}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}
+                    className="action-icon-btn"
+                  >
+                    <ListPlus size={20} />
+                  </button>
+                  <button
+                    onClick={(e) => handleToggleFavorite(e, song.id)}
+                    className={`action-icon-btn ${song.is_favorite ? 'favorited' : ''}`}
+                  >
+                    <Heart size={20} fill={song.is_favorite ? 'var(--neon-pink)' : 'none'} />
+                  </button>
+                </div>
               </div>
+            ))
+          ) : !loading && (
+            <div style={{ textAlign: 'center', padding: '4rem', opacity: 0.5 }}>
+              <Music size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
+              <p>No songs in your library yet. Start uploading or explore trending music!</p>
             </div>
-          ))}
+          )}
         </div>
         
         {loading && (

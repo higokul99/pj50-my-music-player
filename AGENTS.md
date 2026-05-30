@@ -2,6 +2,11 @@
 
 # MusiqSphere - AI Agent Instructions
 
+## Documentation Maintenance Rule (CRITICAL)
+**Always update the relevant documentation in the `docs/` folder whenever a new feature is implemented or an existing one is significantly modified.** 
+- Ensure `requirements.md`, `roadmap.md`, `api-specification.md`, and other relevant files reflect the latest state of the application.
+- Maintain consistency between the codebase and the technical documentation.
+
 ## Project Overview
 
 MusiqSphere is a personal music streaming platform that supports:

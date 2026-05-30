@@ -98,6 +98,31 @@ only appearing in:
 * Active state
 * Audio visualizer
 
+## Implemented Design Elements
+
+### Glassmorphism
+The application uses a consistent "Glass Card" system:
+- `backdrop-filter: blur(10px)`
+- Subtle white borders (`rgba(255, 255, 255, 0.05)`)
+- Low-opacity background fills.
+
+### Stat Highlighting
+Dashboard statistics (Tracks, Artists, Albums) use a "Neon Wrapper" system:
+- **Purple**: Tracks (Music icon)
+- **Blue**: Artists (Users icon)
+- **Pink**: Albums (Library icon)
+Each icon is enclosed in a glowing, tinted box that lifts on hover.
+
+### Dynamic Interaction
+- **Glow Buttons**: 3D glass buttons that emit a color-coded neon glow (Blue/Purple/Pink).
+- **Smooth Transitions**: `fadeIn` and `slideUp` animations for page transitions and modals.
+- **Micro-interactions**: Subtle scaling and shadow deepening on card hovers.
+
+### Typography
+- **Primary Font**: `Outfit` (Sans-serif)
+- **Header Style**: Bold, wide, and uppercase for a high-end dashboard feel.
+- **Hierarchy**: Use of `var(--text-secondary)` (grey) for metadata to maintain focus on primary content.
+
 ---
 
 ## Feeling

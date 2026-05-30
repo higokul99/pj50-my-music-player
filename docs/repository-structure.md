@@ -16,9 +16,11 @@ musiqsphere/
 │   ├── api-specification.md
 │   ├── mobile-app.md
 │   ├── web-app.md
-│   ├── storage.md
-│   ├── deployment.md
-│   ├── security.md
+    ├── storage.md
+    ├── deployment.md
+    ├── deployment-guide.md
+    ├── local-installation-guide.md
+    ├── security.md
 │   ├── user-stories.md
 │   └── roadmap.md
 │

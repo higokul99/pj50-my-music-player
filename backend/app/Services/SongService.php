@@ -31,4 +31,24 @@ class SongService
 
         return $this->songRepository->create($data);
     }
+
+    public function deleteSong($id)
+    {
+        $song = $this->songRepository->findById($id);
+
+        // Delete audio file
+        if (Storage::disk('songs')->exists($song->file_path)) {
+            Storage::disk('songs')->delete($song->file_path);
+        }
+
+        // Delete cover image if it's a local storage path
+        if ($song->cover_image && str_starts_with($song->cover_image, '/storage/songs/covers/')) {
+            $coverPath = str_replace('/storage/', '', $song->cover_image);
+            if (Storage::disk('public')->exists($coverPath)) {
+                Storage::disk('public')->delete($coverPath);
+            }
+        }
+
+        return $song->delete();
+    }
 }

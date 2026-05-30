@@ -26,6 +26,8 @@ interface PlayerContextType {
   playNext: () => void;
   playPrevious: () => void;
   showAddToPlaylist: (songId: number) => void;
+  downloadSong: (song: Song) => Promise<void>;
+  isDownloaded: (songId: number) => boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -40,7 +42,41 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [playlistModalSongId, setPlaylistModalSongId] = useState<number | null>(null);
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [songPlaylistIds, setSongPlaylistIds] = useState<number[]>([]);
+  const [downloadedSongIds, setDownloadedSongIds] = useState<number[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize downloads list
+  useEffect(() => {
+    const initDownloads = async () => {
+      const { DownloadService } = await import('../services/DownloadService');
+      const cache = await caches.open('musiqsphere-audio-cache');
+      const keys = await cache.keys();
+      const ids = keys.map(request => {
+        const url = new URL(request.url);
+        const match = url.pathname.match(/\/api\/songs\/(\d+)\/stream/);
+        return match ? parseInt(match[1]) : null;
+      }).filter((id): id is number => id !== null);
+      
+      setDownloadedSongIds(ids);
+    };
+    initDownloads();
+  }, []);
+
+  const downloadSong = async (song: Song) => {
+     try {
+       const { DownloadService } = await import('../services/DownloadService');
+       const success = await DownloadService.downloadSong(song);
+       if (success) {
+         setDownloadedSongIds(prev => [...prev, song.id]);
+       }
+     } catch (error) {
+       console.error('Download failed', error);
+     }
+   };
+
+  const isDownloaded = (songId: number) => {
+    return downloadedSongIds.includes(songId);
+  };
 
   const showAddToPlaylist = async (songId: number) => {
     setPlaylistModalSongId(songId);
@@ -93,13 +129,15 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   // Play a specific song and optionally update the queue
-  const playSong = useCallback((song: Song, newQueue?: Song[]) => {
+  const playSong = useCallback(async (song: Song, newQueue?: Song[]) => {
     if (newQueue) {
       setQueue(newQueue);
     }
     
     if (audioRef.current) {
-      const streamUrl = `http://localhost:8000/api/songs/${song.id}/stream`;
+      const { DownloadService } = await import('../services/DownloadService');
+      const cachedUrl = await DownloadService.getCachedUrl(song.id);
+      const streamUrl = cachedUrl || `http://localhost:8000/api/songs/${song.id}/stream`;
       
       if (currentSong?.id !== song.id) {
         setCurrentSong(song);
@@ -216,6 +254,8 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         playNext,
         playPrevious,
         showAddToPlaylist,
+        downloadSong,
+        isDownloaded,
       }}
     >
       {children}

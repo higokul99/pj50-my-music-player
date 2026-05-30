@@ -25,7 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/songs', [SongController::class, 'index']);
     Route::get('/explorer', [SongController::class, 'explorer']);
     Route::post('/songs', [SongController::class, 'store']);
+    Route::put('/songs/{id}', [SongController::class, 'update']);
+    Route::delete('/songs/{id}', [SongController::class, 'destroy']);
     Route::post('/songs/{id}/favorite', [SongController::class, 'toggleFavorite']);
+    Route::post('/songs/{id}/clone', [SongController::class, 'cloneToCollection']);
     Route::get('/favorites', [SongController::class, 'favorites']);
 
     // Playlist Routes

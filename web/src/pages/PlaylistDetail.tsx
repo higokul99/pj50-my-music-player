@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Music, Trash2, ArrowLeft, Clock } from 'lucide-react';
+import { Play, Music, Trash2, ArrowLeft, Clock, Download, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 
@@ -9,7 +9,7 @@ const PlaylistDetail: React.FC = () => {
   const navigate = useNavigate();
   const [playlist, setPlaylist] = useState<any>(null);
   const [songs, setSongs] = useState<any[]>([]);
-  const { playSong, currentSong, isPlaying } = usePlayer();
+  const { playSong, currentSong, isPlaying, downloadSong, isDownloaded } = usePlayer();
 
   const fetchPlaylistDetail = async () => {
     try {
@@ -108,6 +108,14 @@ const PlaylistDetail: React.FC = () => {
               </div>
 
               <div className="song-actions-mini">
+                <button
+                  onClick={(e) => { e.stopPropagation(); downloadSong(song); }}
+                  className={`action-icon-btn ${isDownloaded(song.id) ? 'downloaded' : ''}`}
+                  title={isDownloaded(song.id) ? "Downloaded" : "Download for offline"}
+                  disabled={isDownloaded(song.id)}
+                >
+                  {isDownloaded(song.id) ? <CheckCircle size={18} color="var(--neon-blue)" /> : <Download size={18} />}
+                </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleRemoveSong(song.id); }}
                   className="action-icon-btn remove-btn"

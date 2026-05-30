@@ -1,53 +1,50 @@
 # Functional Requirements
 
 ## Authentication
-
-- User Registration
-- User Login
-- User Logout
-- Password Reset
-- Profile Update
+- [x] User Registration
+- [x] User Login
+- [x] User Logout
+- [ ] Password Reset
+- [x] Profile View (Dedicated page)
 
 ## Music Management
-
-- Upload Song
-- Edit Song
-- Delete Song
-- View Song Details
+- [x] Upload Song (with automatic metadata extraction)
+- [x] Edit Song (Cloud metadata update)
+- [x] Delete Song (Cloud removal + storage cleanup)
+- [x] Global Discovery (Explorer mode)
+- [x] Song Cloning (Add global song to personal collection)
 
 ## Music Playback
+- [x] Stream Music (Cloud-based)
+- [x] Pause/Resume/Seek
+- [x] Alphabetical Sorting
+- [x] Infinite Scrolling (Auto-loading)
+- [ ] Background Playback (Mobile focus)
 
-- Stream Music
-- Pause Music
-- Resume Music
-- Seek Music
-- Background Playback
-
-## Offline Downloads
-
-- Download Song
-- Remove Downloaded Song
-- Play Offline
+## Offline Capabilities (Web PWA)
+- [x] Download Song (Cache API)
+- [x] Offline Library Browsing (IndexedDB)
+- [x] Offline Site Loading (Service Worker)
+- [x] Remove Downloaded Song
+- [x] Local-first Playback Logic
 
 ## Search
-
-- Search by Song
-- Search by Artist
-- Search by Album
+- [x] Global Search (All users)
+- [x] Local Search (My Songs only)
+- [x] Multi-criteria (Song/Artist/Album)
 
 ## Favorites
-
-- Like Song
-- Unlike Song
-- View Favorite Songs
+- [x] Like/Unlike Song
+- [x] View Favorites Library
 
 ## Playlists
+- [x] Create/Update/Delete Playlist
+- [x] Add/Remove Songs (with modal selection)
 
-- Create Playlist
-- Update Playlist
-- Delete Playlist
-- Add Song To Playlist
-- Remove Song From Playlist
+## Dashboard
+- [x] Personalized Welcome
+- [x] Real-time Library Stats (Tracks/Artists/Albums)
+- [x] Play All functionality
 
 ## History
 

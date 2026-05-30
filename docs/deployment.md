@@ -35,3 +35,7 @@ Deployment Steps
 3. Run Migrations
 4. Build Frontend
 5. Restart Services
+
+---
+
+**For detailed step-by-step instructions, see the [Deployment Guide](./deployment-guide.md).**

@@ -336,33 +336,74 @@ p {
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.stat-icon {
-  padding: 10px;
+  gap: 1.25rem;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
   border: 1px solid var(--border-subtle);
+  transition: all 0.3s ease;
 }
 
-.stat-icon.purple { color: var(--neon-purple); border-color: rgba(157, 0, 255, 0.2); }
-.stat-icon.blue { color: var(--neon-blue); border-color: rgba(0, 243, 255, 0.2); }
-.stat-icon.pink { color: var(--neon-pink); border-color: rgba(255, 0, 234, 0.2); }
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-icon-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.stat-icon-wrapper svg {
+  position: relative;
+  z-index: 1;
+}
+
+.stat-icon-wrapper.purple { color: var(--neon-purple); }
+.stat-icon-wrapper.purple::before { background: var(--neon-purple); }
+.stat-icon-wrapper.purple { border: 1px solid rgba(157, 0, 255, 0.3); box-shadow: 0 0 15px rgba(157, 0, 255, 0.1); }
+
+.stat-icon-wrapper.blue { color: var(--neon-blue); }
+.stat-icon-wrapper.blue::before { background: var(--neon-blue); }
+.stat-icon-wrapper.blue { border: 1px solid rgba(0, 243, 255, 0.3); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); }
+
+.stat-icon-wrapper.pink { color: var(--neon-pink); }
+.stat-icon-wrapper.pink::before { background: var(--neon-pink); }
+.stat-icon-wrapper.pink { border: 1px solid rgba(255, 0, 234, 0.3); box-shadow: 0 0 15px rgba(255, 0, 234, 0.1); }
 
 .stat-value {
   display: block;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 800;
   line-height: 1;
   color: var(--text-primary);
+  margin-bottom: 2px;
 }
 
 .stat-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* Oversized components */
@@ -507,7 +548,13 @@ p {
   }
 
   .stat-item {
-    gap: 0.75rem;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 40px;
+    height: 40px;
   }
 
   .stat-value {
