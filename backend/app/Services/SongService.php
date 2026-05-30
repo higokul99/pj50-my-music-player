@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Repositories\SongRepository;
-use App\Models\Artist;
-use App\Models\Album;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -19,22 +17,16 @@ class SongService
 
     public function uploadSong(array $data, $songFile, $coverImage = null)
     {
-        $artist = Artist::find($data['artist_id']);
-        $album = isset($data['album_id']) ? Album::find($data['album_id']) : null;
-        
-        $artistSlug = Str::slug($artist->name);
-        $albumSlug = $album ? Str::slug($album->title) : 'unknown-album';
-        
-        $songFileName = time() . '_' . $songFile->getClientOriginalName();
-        $songPath = "music/{$artistSlug}/{$albumSlug}";
-        $songFile->storeAs($songPath, $songFileName, 'public');
-        $data['file_path'] = "/storage/{$songPath}/{$songFileName}";
+        // Store audio file in songs/audio/
+        $songFileName = time() . '_' . Str::slug(pathinfo($songFile->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $songFile->getClientOriginalExtension();
+        $songFile->storeAs('songs/audio', $songFileName, 'public');
+        $data['file_path'] = "/storage/songs/audio/{$songFileName}";
 
+        // Store cover image in songs/covers/
         if ($coverImage) {
-            $coverFileName = time() . '_' . $coverImage->getClientOriginalName();
-            $coverPath = "covers/{$artistSlug}";
-            $coverImage->storeAs($coverPath, $coverFileName, 'public');
-            $data['cover_image'] = "/storage/{$coverPath}/{$coverFileName}";
+            $coverFileName = time() . '_' . Str::slug(pathinfo($coverImage->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $coverImage->getClientOriginalExtension();
+            $coverImage->storeAs('songs/covers', $coverFileName, 'public');
+            $data['cover_image'] = "/storage/songs/covers/{$coverFileName}";
         }
 
         return $this->songRepository->create($data);
