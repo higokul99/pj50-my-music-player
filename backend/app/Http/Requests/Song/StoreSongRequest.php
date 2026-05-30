@@ -24,10 +24,10 @@ class StoreSongRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
-            'artist_id' => 'required|exists:artists,id',
+            'artist_id' => 'nullable|exists:artists,id',
             'album_id' => 'nullable|exists:albums,id',
-            'song_file' => 'required|file|mimetypes:audio/mpeg,audio/mp4,audio/wav,audio/x-wav,audio/aac,audio/ogg|max:51200',
-            'cover_image' => 'nullable|file|mimetypes:image/jpeg,image/png,image/jpg,image/webp|max:2048',
+            'song_file' => 'required|file|mimes:mp3,wav,m4a,aac,oga,ogg,mpga|max:51200',
+            'cover_image' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:2048',
             'duration' => 'nullable|integer',
             'lyrics' => 'nullable|string',
             'genre' => 'nullable|string|max:255',

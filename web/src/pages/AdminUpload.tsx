@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import * as mm from 'music-metadata-browser';
 
 const AdminUpload: React.FC = () => {
   const [artists, setArtists] = useState<any[]>([]);
   const [albums, setAlbums] = useState<any[]>([]);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
 
   // Forms state
   const [artistName, setArtistName] = useState('');
@@ -15,6 +17,45 @@ const AdminUpload: React.FC = () => {
   const [songArtistId, setSongArtistId] = useState('');
   const [songAlbumId, setSongAlbumId] = useState('');
   const [songFile, setSongFile] = useState<File | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (!file) return;
+
+    setSongFile(file);
+    setIsLoadingMetadata(true);
+
+    try {
+      const metadata = await mm.parseBlob(file);
+      const { title, artist, album } = metadata.common;
+
+      if (title) setSongTitle(title);
+      
+      if (artist) {
+        // Try to find existing artist
+        const foundArtist = artists.find(a => a.name.toLowerCase() === artist.toLowerCase());
+        if (foundArtist) {
+          setSongArtistId(foundArtist.id.toString());
+          
+          if (album) {
+            // Try to find existing album for this artist
+            const foundAlbum = albums.find(al => 
+              al.artist_id === foundArtist.id && 
+              al.title.toLowerCase() === album.toLowerCase()
+            );
+            if (foundAlbum) setSongAlbumId(foundAlbum.id.toString());
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error parsing metadata:', err);
+      // Fallback: use filename as title
+      const fileName = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+      if (!songTitle) setSongTitle(fileName);
+    } finally {
+      setIsLoadingMetadata(false);
+    }
+  };
 
   const fetchArtists = async () => {
     try {
@@ -68,11 +109,11 @@ const AdminUpload: React.FC = () => {
 
   const handleUploadSong = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!songFile || !songArtistId) return;
+    if (!songFile) return;
 
     const formData = new FormData();
     formData.append('title', songTitle);
-    formData.append('artist_id', songArtistId);
+    if (songArtistId) formData.append('artist_id', songArtistId);
     if (songAlbumId) formData.append('album_id', songAlbumId);
     formData.append('song_file', songFile);
 
@@ -81,28 +122,46 @@ const AdminUpload: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSongTitle('');
+      setSongArtistId('');
+      setSongAlbumId('');
       setSongFile(null);
       alert('Song Uploaded Successfully!');
-    } catch (e) {
-      console.error(e);
-      alert('Error uploading song');
+    } catch (err: any) {
+      console.error('Upload Error:', err.response?.data || err.message);
+      const errorMessage = err.response?.data?.message || 'Error uploading song';
+      const errors = err.response?.data?.errors;
+      
+      if (errors) {
+        const detail = Object.values(errors).flat().join('\n');
+        alert(`${errorMessage}:\n${detail}`);
+      } else {
+        alert(errorMessage);
+      }
     }
   };
 
-  const inputStyle = {
-    width: '100%', padding: '12px 16px', background: 'rgba(0,0,0,0.5)', 
-    border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'white', outline: 'none',
-    marginBottom: '1rem'
+  const inputStyle: React.CSSProperties = {
+    width: '100%', 
+    padding: '12px 16px', 
+    background: 'rgba(0,0,0,0.8)', 
+    border: '1px solid rgba(255,255,255,0.2)', 
+    borderRadius: '4px', 
+    color: 'white', 
+    outline: 'none',
+    marginBottom: '1rem',
+    fontSize: '1rem',
+    position: 'relative',
+    zIndex: 20
   };
 
   return (
-    <div style={{ animation: 'fadeIn 1s ease' }}>
-      <p style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.9rem', marginBottom: '2rem' }}>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <p style={{ textTransform: 'uppercase', letterSpacing: '0.2em', fontSize: '0.9rem', marginBottom: '1rem' }}>
         System Configuration
       </p>
       <h2 style={{ fontSize: '2rem', marginBottom: '2rem' }}>Library Management</h2>
 
-      <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem' }}>
+      <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
         
         {/* Create Artist */}
         <div className="glass-card">
@@ -112,7 +171,7 @@ const AdminUpload: React.FC = () => {
               style={inputStyle} type="text" placeholder="Artist Name" 
               value={artistName} onChange={(e) => setArtistName(e.target.value)} required 
             />
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Create Artist</button>
+            <button type="submit" className="btn-glass-3d purple" style={{ width: '100%' }}>Create Artist</button>
           </form>
         </div>
 
@@ -128,7 +187,7 @@ const AdminUpload: React.FC = () => {
               <option value="" disabled>Select Artist</option>
               {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', background: 'var(--neon-blue)' }}>Create Album</button>
+            <button type="submit" className="btn-glass-3d blue" style={{ width: '100%' }}>Create Album</button>
           </form>
         </div>
 
@@ -140,22 +199,35 @@ const AdminUpload: React.FC = () => {
               style={inputStyle} type="text" placeholder="Track Title" 
               value={songTitle} onChange={(e) => setSongTitle(e.target.value)} required 
             />
-            <select style={inputStyle} value={songArtistId} onChange={(e) => setSongArtistId(e.target.value)} required>
-              <option value="" disabled>Select Artist</option>
+            
+            <select style={inputStyle} value={songArtistId} onChange={(e) => setSongArtistId(e.target.value)}>
+              <option value="">No Artist (Optional)</option>
+              {artists.length === 0 && <option disabled>No artists found - Create one first!</option>}
               {artists.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
+
             <select style={inputStyle} value={songAlbumId} onChange={(e) => setSongAlbumId(e.target.value)}>
               <option value="">No Album (Single)</option>
-              {albums.filter(al => al.artist_id == songArtistId).map(al => <option key={al.id} value={al.id}>{al.title}</option>)}
+              {albums.filter(al => String(al.artist_id) === String(songArtistId)).map(al => (
+                <option key={al.id} value={al.id}>{al.title}</option>
+              ))}
             </select>
             
-            <input 
-              type="file" accept="audio/*"
-              onChange={(e) => setSongFile(e.target.files ? e.target.files[0] : null)}
-              style={inputStyle} required
-            />
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                {isLoadingMetadata ? 'Parsing Metadata...' : 'Select Audio File (MP3, WAV, M4A)'}
+              </label>
+              <input 
+                type="file" accept="audio/*"
+                onChange={handleFileChange}
+                style={{ ...inputStyle, marginBottom: 0, opacity: isLoadingMetadata ? 0.5 : 1 }} required
+                disabled={isLoadingMetadata}
+              />
+            </div>
             
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', background: 'var(--neon-pink)' }}>Upload Track</button>
+            <button type="submit" className="btn-glass-3d pink" style={{ width: '100%' }}>
+              Upload Track
+            </button>
           </form>
         </div>
       </div>

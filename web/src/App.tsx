@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import Player from './components/Player';
 import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
@@ -7,12 +8,18 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Search from './pages/Search';
 import AdminUpload from './pages/AdminUpload';
+import Favorites from './pages/Favorites';
+import Playlists from './pages/Playlists';
+import PlaylistDetail from './pages/PlaylistDetail';
+import Profile from './pages/Profile';
 import { PlayerProvider } from './context/PlayerContext';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <PlayerProvider>
-      <div className="app-container">
+    <AuthProvider>
+      <PlayerProvider>
+        <div className="app-container">
         {/* Texture Layer */}
         <div className="texture-lines"></div>
 
@@ -23,11 +30,18 @@ function App() {
             <>
               <Sidebar />
               <main className="main-content">
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/admin/upload" element={<AdminUpload />} />
-                </Routes>
+                <Header />
+                <div className="content-wrapper">
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/playlists" element={<Playlists />} />
+                    <Route path="/playlists/:id" element={<PlaylistDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/admin/upload" element={<AdminUpload />} />
+                  </Routes>
+                </div>
               </main>
               <Player />
               <BottomNav />
@@ -35,7 +49,8 @@ function App() {
           } />
         </Routes>
       </div>
-    </PlayerProvider>
+      </PlayerProvider>
+    </AuthProvider>
   );
 }
 

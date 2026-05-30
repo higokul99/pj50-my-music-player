@@ -10,6 +10,8 @@ MusiqSphere is a personal music streaming platform that supports:
 * iOS Application
 * Web Application
 
+# For More details refer docs folder
+
 Users can:
 
 * Register and Login

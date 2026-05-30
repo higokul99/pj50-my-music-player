@@ -17,10 +17,10 @@ class SongService
 
     public function uploadSong(array $data, $songFile, $coverImage = null)
     {
-        // Store audio file in songs/audio/
+        // Store audio file in the external songs directory
         $songFileName = time() . '_' . Str::slug(pathinfo($songFile->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $songFile->getClientOriginalExtension();
-        $songFile->storeAs('songs/audio', $songFileName, 'public');
-        $data['file_path'] = "/storage/songs/audio/{$songFileName}";
+        $songFile->storeAs('', $songFileName, 'songs');
+        $data['file_path'] = $songFileName;
 
         // Store cover image in songs/covers/
         if ($coverImage) {

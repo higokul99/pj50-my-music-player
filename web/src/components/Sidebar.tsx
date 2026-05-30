@@ -26,12 +26,12 @@ const Sidebar: React.FC = () => {
 
         <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2rem', marginBottom: '0.5rem' }}>Library</p>
         
-        <Link to="#" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s' }}>
-          <Heart size={20} />
+        <Link to="/favorites" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/favorites' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+          <Heart size={20} fill={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'none'} color={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'currentColor'} />
           Favorites
         </Link>
-        <Link to="#" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s' }}>
-          <Library size={20} />
+        <Link to="/playlists" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/playlists' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+          <Library size={20} color={location.pathname === '/playlists' ? 'var(--neon-blue)' : 'currentColor'} />
           Playlists
         </Link>
         <Link to="/admin/upload" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/upload' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s', marginTop: '1rem' }}>

@@ -28,11 +28,11 @@ const BottomNav: React.FC = () => {
         <Compass size={20} />
         Explore
       </Link>
-      <Link to="#" style={navStyle('/favorites')}>
-        <Heart size={20} />
+      <Link to="/favorites" style={navStyle('/favorites')}>
+        <Heart size={20} fill={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'none'} />
         Favorites
       </Link>
-      <Link to="#" style={navStyle('/playlists')}>
+      <Link to="/playlists" style={navStyle('/playlists')}>
         <Library size={20} />
         Library
       </Link>

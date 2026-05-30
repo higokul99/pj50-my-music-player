@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\AlbumController;
+use App\Http\Controllers\Api\PlaylistController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,7 +23,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('albums', AlbumController::class);
 
     Route::get('/songs', [SongController::class, 'index']);
+    Route::get('/explorer', [SongController::class, 'explorer']);
     Route::post('/songs', [SongController::class, 'store']);
+    Route::post('/songs/{id}/favorite', [SongController::class, 'toggleFavorite']);
+    Route::get('/favorites', [SongController::class, 'favorites']);
+
+    // Playlist Routes
+    Route::get('/playlists', [PlaylistController::class, 'index']);
+    Route::post('/playlists', [PlaylistController::class, 'store']);
+    Route::get('/playlists/{id}', [PlaylistController::class, 'show']);
+    Route::put('/playlists/{id}', [PlaylistController::class, 'update']);
+    Route::delete('/playlists/{id}', [PlaylistController::class, 'destroy']);
+    Route::post('/playlists/{id}/songs', [PlaylistController::class, 'addSong']);
+    Route::delete('/playlists/{id}/songs', [PlaylistController::class, 'removeSong']);
+    Route::get('/songs/{songId}/playlists', [PlaylistController::class, 'getSongPlaylists']);
 });
 
 Route::get('/songs/{id}/stream', [SongController::class, 'stream']);
