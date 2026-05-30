@@ -50,7 +50,7 @@ Returns audio stream. Automatically supports range requests for seeking.
 
 ---
 
-## Download
+## Download 
 
 GET /songs/{id}/download
 Returns downloadable MP3 file.
