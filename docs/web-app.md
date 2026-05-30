@@ -11,8 +11,10 @@ Features
 - Registration
 - Music Streaming
 - Search
+- Search
 - Playlists
 - Favorites
+- Mobile Responsive Design (Bottom Tab Nav on Mobile)
 
 Admin Features
 

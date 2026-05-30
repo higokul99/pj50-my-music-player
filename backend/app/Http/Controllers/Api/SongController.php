@@ -23,6 +23,12 @@ class SongController extends Controller
         $this->songRepository = $songRepository;
     }
 
+    public function index()
+    {
+        $songs = \App\Models\Song::with(['artist', 'album'])->get();
+        return $this->successResponse(SongResource::collection($songs), 'Songs retrieved successfully');
+    }
+
     public function store(StoreSongRequest $request)
     {
         $song = $this->songService->uploadSong(
