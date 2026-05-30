@@ -90,7 +90,7 @@ MusiqSphere is a cross-platform music streaming platform that allows users to st
 
 ### Infrastructure
 
-* Premium Web Hosting
+* Hostinger Premium Web Hosting
 
 ---
 
@@ -105,7 +105,7 @@ Flutter Mobile App (Android/iOS)
     ------------------
     |                |
   MySQL        Music Storage
- Database    Premium Web Hosting
+ Database    Hostinger Premium Web Hosting
             |
             |
       React Web App

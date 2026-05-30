@@ -2,7 +2,7 @@
 
 Provider
 
-Premium Web Hosting
+Hostinger Premium Web Hosting
 
 Directory Structure
 

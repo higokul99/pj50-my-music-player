@@ -42,7 +42,7 @@ Users can:
 
 ## Infrastructure
 
-* Premium Web Hosting
+* Hostinger Premium Web Hosting
 
 ## Authentication
 
@@ -454,4 +454,4 @@ Future Features
 
 # Primary Objective
 
-Build a stable, scalable, secure music streaming platform called MusiqSphere that supports Android, iOS, and Web clients using a Laravel API backend and Premium Web Hosting music storage.
+Build a stable, scalable, secure music streaming platform called MusiqSphere that supports Android, iOS, and Web clients using a Laravel API backend and Hostinger Premium Web Hosting music storage.
