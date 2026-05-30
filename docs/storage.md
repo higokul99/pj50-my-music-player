@@ -2,23 +2,22 @@
 
 Provider
 
-Hostinger Premium Web Hosting
+Hostinger Premium Web Hosting / Local External Storage
 
 Directory Structure
 
-/storage/music/
-/storage/covers/
-/storage/temp/
+The music storage location is configurable via the `SONGS_STORAGE_PATH` environment variable. 
+Default: `C:/wamp64/www/github/musiqsphere_storage` (previously `../songs`)
 
 Music Storage Example
 
-/storage/music/artist-name/album-name/song.mp3
+`{SONGS_STORAGE_PATH}/artist-name/album-name/song.mp3`
 
 Album Covers
 
-/storage/covers/artist-name/album-cover.jpg
+Stored in `public/storage/songs/covers/` (symlinked from `storage/app/public`)
 
-Database stores only file paths.
+Database stores only relative file paths within the `songs` disk.
 
 Example
 

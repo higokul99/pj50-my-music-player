@@ -49,7 +49,7 @@ return [
 
         'songs' => [
             'driver' => 'local',
-            'root' => base_path('../songs'),
+            'root' => env('SONGS_STORAGE_PATH', base_path('../songs')),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

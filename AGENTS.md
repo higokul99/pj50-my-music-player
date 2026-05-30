@@ -177,15 +177,14 @@ Passwords must be hashed using Laravel defaults.
 
 # Music Storage Rules
 
-Music files are stored on Premium Web Hosting storage.
+Music files are stored on Premium Web Hosting storage or a configured local path.
 
 Directory Structure:
 
-/storage/music/
-/storage/covers/
-/storage/temp/
+The root path is defined by `SONGS_STORAGE_PATH` in `.env`.
+Example: `C:/wamp64/www/github/musiqsphere_storage`
 
-Database stores file paths only.
+Database stores file paths only (relative to the songs disk root).
 
 Never store binary music files inside the database.
 
