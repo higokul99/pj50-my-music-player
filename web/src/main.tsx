@@ -2,8 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Buffer } from 'buffer';
 import App from './App.tsx';
 import './index.css';
+
+// Polyfill Buffer for music-metadata-browser
+if (typeof window !== 'undefined') {
+  window.Buffer = window.Buffer || Buffer;
+}
 
 // Register Service Worker for offline access
 if ('serviceWorker' in navigator) {

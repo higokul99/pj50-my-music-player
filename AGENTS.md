@@ -50,6 +50,7 @@ Users can:
 ## Infrastructure
 
 * Hostinger Premium Web Hosting
+* **NOTE**: This environment DOES NOT support Node.js/NPM. Frontend builds must be done locally.
 
 ## Authentication
 

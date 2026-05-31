@@ -94,6 +94,16 @@ MusiqSphere is a cross-platform music streaming platform that allows users to st
 
 ---
 
+## Deployment
+
+MusiqSphere is deployed on Hostinger Premium Web Hosting. 
+
+**Note on Frontend**: The hosting environment does not support Node.js/NPM. All web builds must be generated locally using `npm run build` and then uploaded to the server.
+
+Refer to the [Deployment Guide](docs/deployment-guide.md) for detailed instructions.
+
+---
+
 ## Architecture
 
 ```text

@@ -111,7 +111,6 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const toggleFavorite = async (songId: number) => {
     try {
-      const { default: api } = await import('../services/api');
       await api.post(`/songs/${songId}/favorite`);
       
       if (currentSong && currentSong.id === songId) {
@@ -132,9 +131,13 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
     
     if (audioRef.current) {
-      const { DownloadService } = await import('../services/DownloadService');
       const cachedUrl = await DownloadService.getCachedUrl(song.id);
-      const streamUrl = cachedUrl || `http://localhost:8000/api/songs/${song.id}/stream`;
+      
+      const baseURL = import.meta.env.MODE === 'production' 
+        ? window.location.origin 
+        : 'http://localhost:8000';
+        
+      const streamUrl = cachedUrl || `${baseURL}/api/songs/${song.id}/stream`;
       
       if (currentSong?.id !== song.id) {
         setCurrentSong(song);

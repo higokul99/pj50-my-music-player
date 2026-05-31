@@ -60,15 +60,17 @@ php artisan storage:link
 
 ## 3. Frontend Configuration (`prod/web`)
 
-### Build & Upload
-1.  **Local Build**: On your local machine, run:
+**IMPORTANT**: The Hostinger Premium Web Hosting plan **does not support Node.js or NPM**. You cannot run build commands on the server.
+
+### Build & Upload (LOCAL ONLY)
+1.  **Local Build**: On your local development machine (where Node.js is installed), run:
     ```bash
     cd web
     npm install
     npm run build
     ```
-2.  **Automatic Production URL**: The code in `web/src/services/api.ts` is now set to automatically use `https://musiqsphere.metora.in/api` when built in production mode.
-3.  **Upload**: Upload the entire **`web/dist`** folder content to your production `prod/web/dist/` directory.
+2.  **Automatic Production URL**: The code in `web/src/services/api.ts` uses `window.location.origin` to automatically detect the API URL in production.
+3.  **Upload**: Use FTP or Git to upload the **`web/dist`** folder contents to your production `prod/web/dist/` directory.
 
 ---
 

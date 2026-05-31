@@ -25,29 +25,37 @@ class SongController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
-        $query = $request->input('q');
+        try {
+            $user = auth()->user();
+            $query = $request->input('q');
 
-        $songs = \App\Models\Song::where(function($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhereNull('user_id');
-            })
-            ->when($query, function($q) use ($query) {
-                $q->where(function($sq) use ($query) {
-                    $sq->where('title', 'like', "%{$query}%")
-                       ->orWhereHas('artist', function($aq) use ($query) {
-                           $aq->where('name', 'like', "%{$query}%");
-                       })
-                       ->orWhereHas('album', function($alq) use ($query) {
-                           $alq->where('title', 'like', "%{$query}%");
-                       });
-                });
-            })
-            ->with(['artist', 'album'])
-            ->orderBy('title', 'asc')
-            ->paginate(20);
+            $songs = \App\Models\Song::where(function($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                      ->orWhereNull('user_id');
+                })
+                ->when($query, function($q) use ($query) {
+                    $q->where(function($sq) use ($query) {
+                        $sq->where('title', 'like', "%{$query}%")
+                           ->orWhereHas('artist', function($aq) use ($query) {
+                               $aq->where('name', 'like', "%{$query}%");
+                           })
+                           ->orWhereHas('album', function($alq) use ($query) {
+                               $alq->where('title', 'like', "%{$query}%");
+                           });
+                    });
+                })
+                ->with(['artist', 'album'])
+                ->orderBy('title', 'asc')
+                ->paginate(20);
 
-        return $this->successResponse(SongResource::collection($songs)->response()->getData(true), 'Songs retrieved successfully');
+            return $this->successResponse(SongResource::collection($songs)->response()->getData(true), 'Songs retrieved successfully');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Songs index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id()
+            ]);
+            return $this->errorResponse('Server Error', [], 500);
+        }
     }
 
     public function explorer(Request $request)
