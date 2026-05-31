@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Music, ListPlus } from 'lucide-react';
+import { Heart, Music, ListPlus, Download, CheckCircle, Loader2 } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 
 const Favorites: React.FC = () => {
   const [favoriteSongs, setFavoriteSongs] = useState<any[]>([]);
-  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist } = usePlayer();
+  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading } = usePlayer();
 
   const fetchFavorites = async () => {
     try {
@@ -84,6 +84,20 @@ const Favorites: React.FC = () => {
               </div>
 
               <div className="song-actions-mini">
+                <button
+                  onClick={(e) => { e.stopPropagation(); downloadSong(song); }}
+                  className={`action-icon-btn ${isDownloaded(song.id) ? 'downloaded' : ''} ${isDownloading(song.id) ? 'downloading' : ''}`}
+                  title={isDownloaded(song.id) ? "Downloaded" : isDownloading(song.id) ? "Downloading..." : "Download"}
+                  disabled={isDownloaded(song.id) || isDownloading(song.id)}
+                >
+                  {isDownloaded(song.id) ? (
+                    <CheckCircle size={20} color="var(--neon-blue)" />
+                  ) : isDownloading(song.id) ? (
+                    <Loader2 className="animate-spin" size={20} color="var(--neon-purple)" />
+                  ) : (
+                    <Download size={20} />
+                  )}
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}
                   className="action-icon-btn"

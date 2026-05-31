@@ -11,7 +11,7 @@ const Search: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'my' | 'global'>('global');
-  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded } = usePlayer();
+  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading } = usePlayer();
   const { user: currentUser } = useAuth();
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -188,11 +188,17 @@ const Search: React.FC = () => {
                 )}
                 <button
                   onClick={(e) => { e.stopPropagation(); downloadSong(song); }}
-                  className={`action-icon-btn ${isDownloaded(song.id) ? 'downloaded' : ''}`}
-                  title={isDownloaded(song.id) ? "Downloaded" : "Download for offline"}
-                  disabled={isDownloaded(song.id)}
+                  className={`action-icon-btn ${isDownloaded(song.id) ? 'downloaded' : ''} ${isDownloading(song.id) ? 'downloading' : ''}`}
+                  title={isDownloaded(song.id) ? "Downloaded" : isDownloading(song.id) ? "Downloading..." : "Download"}
+                  disabled={isDownloaded(song.id) || isDownloading(song.id)}
                 >
-                  {isDownloaded(song.id) ? <CheckCircle size={20} color="var(--neon-blue)" /> : <Download size={20} />}
+                  {isDownloaded(song.id) ? (
+                    <CheckCircle size={20} color="var(--neon-blue)" />
+                  ) : isDownloading(song.id) ? (
+                    <Loader2 className="animate-spin" size={20} color="var(--neon-purple)" />
+                  ) : (
+                    <Download size={20} />
+                  )}
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}

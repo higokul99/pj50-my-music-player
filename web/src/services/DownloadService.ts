@@ -2,6 +2,12 @@ const CACHE_NAME = 'musiqsphere-audio-cache';
 const DB_NAME = 'musiqsphere-db';
 const STORE_NAME = 'songs';
 
+const getBaseURL = () => {
+  return import.meta.env.MODE === 'production' 
+    ? window.location.origin 
+    : 'http://localhost:8000';
+};
+
 const openDB = (): Promise<IDBDatabase> => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -21,7 +27,8 @@ export const DownloadService = {
    * Downloads a song and stores it in the Cache API and metadata in IndexedDB
    */
   async downloadSong(song: any): Promise<boolean> {
-    const streamUrl = `http://localhost:8000/api/songs/${song.id}/stream`;
+    const baseURL = getBaseURL();
+    const streamUrl = `${baseURL}/api/songs/${song.id}/stream`;
     
     try {
       // 1. Cache the audio file
@@ -68,7 +75,8 @@ export const DownloadService = {
    * Checks if a song is already in the cache
    */
   async isDownloaded(songId: number): Promise<boolean> {
-    const streamUrl = `http://localhost:8000/api/songs/${songId}/stream`;
+    const baseURL = getBaseURL();
+    const streamUrl = `${baseURL}/api/songs/${songId}/stream`;
     const cache = await caches.open(CACHE_NAME);
     const response = await cache.match(streamUrl);
     return !!response;
@@ -78,7 +86,8 @@ export const DownloadService = {
    * Gets the cached blob URL if available
    */
   async getCachedUrl(songId: number): Promise<string | null> {
-    const streamUrl = `http://localhost:8000/api/songs/${songId}/stream`;
+    const baseURL = getBaseURL();
+    const streamUrl = `${baseURL}/api/songs/${songId}/stream`;
     const cache = await caches.open(CACHE_NAME);
     const response = await cache.match(streamUrl);
     
@@ -94,12 +103,13 @@ export const DownloadService = {
    * Removes a song from the cache and IndexedDB
    */
   async removeDownload(songId: number): Promise<boolean> {
-    const streamUrl = `http://localhost:8000/api/songs/${songId}/stream`;
+    const baseURL = getBaseURL();
+    const streamUrl = `${baseURL}/api/songs/${songId}/stream`;
     
     try {
       // 1. Remove audio from cache
       const cache = await caches.open(CACHE_NAME);
-      const cacheDeleted = await cache.delete(streamUrl);
+      await cache.delete(streamUrl);
 
       // 2. Remove metadata from IndexedDB
       const db = await openDB();
@@ -107,7 +117,7 @@ export const DownloadService = {
       const store = tx.objectStore(STORE_NAME);
       await store.delete(songId);
       
-      return cacheDeleted;
+      return true;
     } catch (error) {
       console.error('Failed to remove download:', error);
       return false;

@@ -29,6 +29,7 @@ interface PlayerContextType {
   showAddToPlaylist: (songId: number) => void;
   downloadSong: (song: Song) => Promise<void>;
   isDownloaded: (songId: number) => boolean;
+  isDownloading: (songId: number) => boolean;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -44,6 +45,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [playlists, setPlaylists] = useState<any[]>([]);
   const [songPlaylistIds, setSongPlaylistIds] = useState<number[]>([]);
   const [downloadedSongIds, setDownloadedSongIds] = useState<number[]>([]);
+  const [downloadingIds, setDownloadingIds] = useState<number[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize downloads list
@@ -63,18 +65,44 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, []);
 
   const downloadSong = async (song: Song) => {
+     if (downloadingIds.includes(song.id)) return;
+     
+     setDownloadingIds(prev => [...prev, song.id]);
      try {
+       // 1. Internal cache for offline playback
        const success = await DownloadService.downloadSong(song);
        if (success) {
          setDownloadedSongIds(prev => [...prev, song.id]);
        }
+
+       // 2. Trigger actual browser download
+       const baseURL = import.meta.env.MODE === 'production' 
+         ? window.location.origin 
+         : 'http://localhost:8000';
+         
+       const downloadUrl = `${baseURL}/api/songs/${song.id}/download`;
+       
+       const link = document.createElement('a');
+       link.href = downloadUrl;
+       link.setAttribute('download', `${song.title}.mp3`);
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+       
      } catch (error) {
        console.error('Download failed', error);
+       alert('Failed to download song. Please try again.');
+     } finally {
+       setDownloadingIds(prev => prev.filter(id => id !== song.id));
      }
    };
 
   const isDownloaded = (songId: number) => {
     return downloadedSongIds.includes(songId);
+  };
+
+  const isDownloading = (songId: number) => {
+    return downloadingIds.includes(songId);
   };
 
   const showAddToPlaylist = async (songId: number) => {
@@ -256,6 +284,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         showAddToPlaylist,
         downloadSong,
         isDownloaded,
+        isDownloading,
       }}
     >
       {children}
