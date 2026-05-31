@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Library, Settings, Download, LogIn, UserPlus, List } from 'lucide-react';
+import { Home, Compass, Heart, Library, Settings, Download, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar: React.FC = () => {
@@ -45,10 +45,6 @@ const Sidebar: React.FC = () => {
             <Link to="/admin/upload" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/upload' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s', marginTop: '1rem' }}>
               <Settings size={20} />
               Library Management
-            </Link>
-            <Link to="/admin/songs" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/songs' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s' }}>
-              <List size={20} />
-              Manage Uploaded Songs
             </Link>
           </>
         ) : (
