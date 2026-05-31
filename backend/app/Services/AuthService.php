@@ -17,7 +17,6 @@ class AuthService
 
     public function register(array $data)
     {
-        $data['password'] = Hash::make($data['password']);
         $user = $this->authRepository->create($data);
         
         $token = $user->createToken('auth_token')->plainTextToken;

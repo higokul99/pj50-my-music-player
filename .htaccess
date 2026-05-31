@@ -1,18 +1,16 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
 
     # 1. Route API requests to Laravel Backend
-    # Any request starting with /api will be handled by Laravel's index.php
-    RewriteRule ^api/(.*)$ backend/public/index.php [L]
+    # Ensure QSA is used to pass query parameters
+    RewriteRule ^api/(.*)$ backend/public/index.php [QSA,L]
 
     # 2. Serve Static Files from React Build
-    # If the request matches a file in web/dist, serve it directly
     RewriteCond %{DOCUMENT_ROOT}/web/dist/$1 -f
     RewriteRule ^(.*)$ web/dist/$1 [L]
 
     # 3. React SPA Routing
-    # For all other requests that are not files/directories and not API,
-    # redirect to the React index.html to allow client-side routing
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} !^/api

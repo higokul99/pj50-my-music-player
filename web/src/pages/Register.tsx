@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Register: React.FC = () => {
+  const { refreshUser } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,10 +25,18 @@ const Register: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.post('/register', { name, email, password, password_confirmation: confirmPassword });
-      localStorage.setItem('auth_token', response.data.data.token);
-      navigate('/');
+      
+      if (response.data.success) {
+        localStorage.setItem('auth_token', response.data.data.token);
+        await refreshUser();
+        navigate('/');
+      } else {
+        setError(response.data.message || 'Registration failed.');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      const message = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

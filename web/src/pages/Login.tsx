@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const Login: React.FC = () => {
+  const { refreshUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,10 +17,17 @@ const Login: React.FC = () => {
     setLoading(true);
     try {
       const response = await api.post('/login', { email, password });
-      localStorage.setItem('auth_token', response.data.data.token);
-      navigate('/');
+      if (response.data.success) {
+        localStorage.setItem('auth_token', response.data.data.token);
+        await refreshUser();
+        navigate('/');
+      } else {
+        setError(response.data.message || 'Login failed.');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      console.error('Login error:', err);
+      const message = err.response?.data?.message || err.message || 'Invalid credentials. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

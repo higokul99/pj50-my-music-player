@@ -23,12 +23,18 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $data = $this->authService->register($request->validated());
-        
-        return $this->successResponse([
-            'user' => new UserResource($data['user']),
-            'token' => $data['token']
-        ], 'User registered successfully', 201);
+        try {
+            $data = $this->authService->register($request->validated());
+            
+            return $this->successResponse([
+                'user' => new UserResource($data['user']),
+                'token' => $data['token']
+            ], 'User registered successfully', 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse('Validation failed', $e->errors(), 422);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e->getMessage(), [], 500);
+        }
     }
 
     public function login(LoginRequest $request)
