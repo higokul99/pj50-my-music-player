@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Library, Settings, Download, LogIn } from 'lucide-react';
+import { Home, Compass, Heart, Library, Settings, Download, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar: React.FC = () => {
@@ -48,10 +48,17 @@ const Sidebar: React.FC = () => {
             </Link>
           </>
         ) : (
-          <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--neon-purple)', textDecoration: 'none', fontWeight: 600, transition: 'color 0.3s', marginTop: '2rem' }}>
-            <LogIn size={20} />
-            Sign In
-          </Link>
+          <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Account</p>
+            <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--neon-purple)', textDecoration: 'none', fontWeight: 600, transition: 'color 0.3s' }}>
+              <LogIn size={20} />
+              Sign In
+            </Link>
+            <Link to="/register" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--neon-blue)', textDecoration: 'none', fontWeight: 600, transition: 'color 0.3s' }}>
+              <UserPlus size={20} />
+              Create Account
+            </Link>
+          </div>
         )}
       </nav>
     </aside>
