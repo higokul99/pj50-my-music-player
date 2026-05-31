@@ -60,24 +60,29 @@ class SongController extends Controller
 
     public function explorer(Request $request)
     {
-        $query = $request->input('q');
+        try {
+            $query = $request->input('q');
 
-        $songs = \App\Models\Song::with(['artist', 'album'])
-            ->when($query, function($q) use ($query) {
-                $q->where(function($sq) use ($query) {
-                    $sq->where('title', 'like', "%{$query}%")
-                       ->orWhereHas('artist', function($aq) use ($query) {
-                           $aq->where('name', 'like', "%{$query}%");
-                       })
-                       ->orWhereHas('album', function($alq) use ($query) {
-                           $alq->where('title', 'like', "%{$query}%");
-                       });
-                });
-            })
-            ->orderBy('title', 'asc')
-            ->paginate(20);
-            
-        return $this->successResponse(SongResource::collection($songs)->response()->getData(true), 'Explorer songs retrieved successfully');
+            $songs = \App\Models\Song::with(['artist', 'album'])
+                ->when($query, function($q) use ($query) {
+                    $q->where(function($sq) use ($query) {
+                        $sq->where('title', 'like', "%{$query}%")
+                           ->orWhereHas('artist', function($aq) use ($query) {
+                               $aq->where('name', 'like', "%{$query}%");
+                           })
+                           ->orWhereHas('album', function($alq) use ($query) {
+                               $alq->where('title', 'like', "%{$query}%");
+                           });
+                    });
+                })
+                ->orderBy('title', 'asc')
+                ->paginate(20);
+                
+            return $this->successResponse(SongResource::collection($songs)->response()->getData(true), 'Explorer songs retrieved successfully');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Explorer error: ' . $e->getMessage());
+            return $this->errorResponse('Server Error', [], 500);
+        }
     }
 
     public function cloneToCollection($id)
@@ -103,16 +108,24 @@ class SongController extends Controller
 
     public function store(StoreSongRequest $request)
     {
-        $data = $request->validated();
-        $data['user_id'] = auth()->id();
+        try {
+            $data = $request->validated();
+            $data['user_id'] = auth()->id();
 
-        $song = $this->songService->uploadSong(
-            $data,
-            $request->file('song_file'),
-            $request->file('cover_image')
-        );
+            $song = $this->songService->uploadSong(
+                $data,
+                $request->file('song_file'),
+                $request->file('cover_image')
+            );
 
-        return $this->successResponse(new SongResource($song), 'Song uploaded successfully', 201);
+            return $this->successResponse(new SongResource($song), 'Song uploaded successfully', 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Song upload error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id()
+            ]);
+            return $this->errorResponse('Server Error: ' . $e->getMessage(), [], 500);
+        }
     }
 
     public function stream($id)

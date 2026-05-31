@@ -8,7 +8,7 @@ import './index.css';
 
 // Polyfill Buffer for music-metadata-browser
 if (typeof window !== 'undefined') {
-  window.Buffer = window.Buffer || Buffer;
+  (window as any).Buffer = (window as any).Buffer || Buffer;
 }
 
 // Register Service Worker for offline access
