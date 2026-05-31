@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useEffect, ReactNode, useCallback } from 'react';
-
 import { X, Check } from 'lucide-react';
+import api from '../services/api';
+import { DownloadService } from '../services/DownloadService';
 
 interface Song {
   id: number;

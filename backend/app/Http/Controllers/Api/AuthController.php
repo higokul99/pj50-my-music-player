@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -31,8 +32,10 @@ class AuthController extends Controller
                 'token' => $data['token']
             ], 'User registered successfully', 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Registration validation failed', ['errors' => $e->errors()]);
             return $this->errorResponse('Validation failed', $e->errors(), 422);
         } catch (\Exception $e) {
+            Log::error('Registration error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return $this->errorResponse($e->getMessage(), [], 500);
         }
     }
@@ -47,7 +50,11 @@ class AuthController extends Controller
                 'token' => $data['token']
             ], 'User logged in successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Login validation failed', ['errors' => $e->errors()]);
             return $this->errorResponse('Validation failed', $e->errors(), 422);
+        } catch (\Exception $e) {
+            Log::error('Login error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return $this->errorResponse('An error occurred during login', [], 500);
         }
     }
 
