@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import * as mm from 'music-metadata-browser';
-import { Settings, List } from 'lucide-react';
+import { List } from 'lucide-react';
 
 const AdminUpload: React.FC = () => {
   const navigate = useNavigate();

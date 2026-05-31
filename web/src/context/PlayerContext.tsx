@@ -48,7 +48,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Initialize downloads list
   useEffect(() => {
     const initDownloads = async () => {
-      const { DownloadService } = await import('../services/DownloadService');
+      await import('../services/DownloadService');
       const cache = await caches.open('musiqsphere-audio-cache');
       const keys = await cache.keys();
       const ids = keys.map(request => {

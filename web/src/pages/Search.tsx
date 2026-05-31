@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search as SearchIcon, Play, Music, Heart, ListPlus, Loader2, Download, CheckCircle, PlusCircle, Globe, User } from 'lucide-react';
+import { Search as SearchIcon, Music, Heart, ListPlus, Loader2, Download, CheckCircle, PlusCircle, Globe, User } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';

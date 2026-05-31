@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Music, Trash2, ArrowLeft, Clock, Download, CheckCircle } from 'lucide-react';
+import { Play, Music, Trash2, ArrowLeft, Download, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 

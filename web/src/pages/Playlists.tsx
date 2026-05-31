@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Library, Music, Play, Trash2, X } from 'lucide-react';
 import api from '../services/api';
-import { usePlayer } from '../context/PlayerContext';
 import { Link } from 'react-router-dom';
 
 const Playlists: React.FC = () => {
@@ -9,7 +8,6 @@ const Playlists: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [newPlaylistDesc, setNewPlaylistDesc] = useState('');
-  const { playSong } = usePlayer();
 
   const fetchPlaylists = async () => {
     try {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Download, Music, Play, Heart, ListPlus, Trash2 } from 'lucide-react';
+import { Download, Music, Heart, ListPlus, Trash2 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import { DownloadService } from '../services/DownloadService';
 

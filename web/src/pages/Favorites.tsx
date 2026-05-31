@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Music, Play, ListPlus } from 'lucide-react';
+import { Heart, Music, ListPlus } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 
