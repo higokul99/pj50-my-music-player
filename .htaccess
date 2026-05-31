@@ -11,8 +11,11 @@
     RewriteRule ^(.*)$ web/dist/$1 [L]
 
     # 3. React SPA Routing
+    # If the request is not for a real file, and not for the API, send to React
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} !^/api
     RewriteRule ^(.*)$ web/dist/index.html [L]
+
+    # 4. Special case: explicitly handle the root directory
+    RewriteRule ^$ web/dist/index.html [L]
 </IfModule>
