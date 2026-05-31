@@ -13,6 +13,11 @@ use App\Http\Controllers\Api\PlaylistController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/test-log', function () {
+    \Illuminate\Support\Facades\Log::info('Test log entry triggered at ' . now());
+    return response()->json(['success' => true, 'message' => 'Log entry created!']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {

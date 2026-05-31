@@ -49,7 +49,6 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Initialize downloads list
   useEffect(() => {
     const initDownloads = async () => {
-      await import('../services/DownloadService');
       const cache = await caches.open('musiqsphere-audio-cache');
       const keys = await cache.keys();
       const ids = keys.map(request => {
@@ -65,7 +64,6 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const downloadSong = async (song: Song) => {
      try {
-       const { DownloadService } = await import('../services/DownloadService');
        const success = await DownloadService.downloadSong(song);
        if (success) {
          setDownloadedSongIds(prev => [...prev, song.id]);
@@ -82,7 +80,6 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const showAddToPlaylist = async (songId: number) => {
     setPlaylistModalSongId(songId);
     try {
-      const { default: api } = await import('../services/api');
       const [playlistsRes, songPlaylistsRes] = await Promise.all([
         api.get('/playlists'),
         api.get(`/songs/${songId}/playlists`)
@@ -98,7 +95,6 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     if (!playlistModalSongId) return;
     
     try {
-      const { default: api } = await import('../services/api');
       const isInPlaylist = songPlaylistIds.includes(playlistId);
       
       if (isInPlaylist) {

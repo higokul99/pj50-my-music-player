@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.MODE === 'production' 
-    ? 'https://musiqsphere.metora.in/api' 
+    ? `${window.location.origin}/api` 
     : 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
