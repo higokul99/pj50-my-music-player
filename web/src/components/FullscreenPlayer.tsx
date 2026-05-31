@@ -53,6 +53,9 @@ const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
         {/* Rotating Disk */}
         <div className="disk-container">
           <div className={`music-disk ${isPlaying ? 'rotating' : ''}`}>
+            {/* Luminous Reflection / Triangle Effect */}
+            <div className="disk-luminous-effect"></div>
+            
             {/* Vinyl Texture */}
             <div className="vinyl-grooves"></div>
             
@@ -235,29 +238,53 @@ const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
         .music-disk {
           width: 100%;
           height: 100%;
-          background: #111;
+          background: #000;
           border-radius: 50%;
           position: relative;
-          box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05);
+          box-shadow: 
+            0 0 40px rgba(0,0,0,1), 
+            inset 0 0 50px rgba(168, 85, 247, 0.2),
+            0 0 30px rgba(34, 197, 94, 0.15);
           border: 4px solid #1a1a1a;
           display: flex;
           align-items: center;
           justify-content: center;
           transition: transform 0.8s ease;
+          overflow: hidden;
+        }
+
+        .disk-luminous-effect {
+          position: absolute;
+          inset: 0;
+          background: conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            rgba(34, 197, 94, 0.3) 15deg,   /* Neon Green */
+            rgba(168, 85, 247, 0.3) 30deg,  /* Neon Violet */
+            transparent 45deg,
+            transparent 180deg,
+            rgba(34, 197, 94, 0.1) 195deg,
+            rgba(168, 85, 247, 0.1) 210deg,
+            transparent 225deg
+          );
+          z-index: 1;
+          filter: blur(2px);
+          opacity: 0.8;
         }
 
         .vinyl-grooves {
           position: absolute;
-          inset: 5px;
+          inset: 0;
           border-radius: 50%;
           background: repeating-radial-gradient(
             circle at center,
-            #111,
-            #111 2px,
-            #181818 3px,
-            #111 4px
+            rgba(20, 20, 20, 1),
+            rgba(20, 20, 20, 1) 2px,
+            rgba(30, 30, 30, 1) 3px,
+            rgba(20, 20, 20, 1) 4px
           );
-          opacity: 0.4;
+          opacity: 0.8;
+          z-index: 2;
         }
 
         .disk-center {
@@ -265,9 +292,10 @@ const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
           height: 38%;
           border-radius: 50%;
           overflow: hidden;
-          z-index: 2;
+          z-index: 5;
           background: #222;
-          box-shadow: 0 0 20px rgba(0,0,0,0.5);
+          box-shadow: 0 0 20px rgba(0,0,0,0.8);
+          border: 2px solid rgba(255,255,255,0.1);
         }
 
         .disk-center img { width: 100%; height: 100%; objectFit: cover; }
@@ -279,8 +307,9 @@ const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
           height: 4%;
           background: #000;
           border-radius: 50%;
-          z-index: 3;
-          border: 1px solid rgba(255,255,255,0.1);
+          z-index: 6;
+          border: 1px solid rgba(255,255,255,0.2);
+          box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
         }
 
         .rotating {
