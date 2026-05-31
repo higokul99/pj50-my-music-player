@@ -1,8 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Heart, Library, Settings, Download } from 'lucide-react';
+import { Home, Compass, Heart, Library, Settings, Download, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
 
   return (
     <aside className="sidebar">
@@ -24,24 +26,33 @@ const Sidebar: React.FC = () => {
           Explore
         </Link>
 
-        <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2rem', marginBottom: '0.5rem' }}>Library</p>
-        
-        <Link to="/favorites" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/favorites' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
-          <Heart size={20} fill={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'none'} color={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'currentColor'} />
-          Favorites
-        </Link>
-        <Link to="/playlists" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/playlists' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
-          <Library size={20} color={location.pathname === '/playlists' ? 'var(--neon-blue)' : 'currentColor'} />
-          Playlists
-        </Link>
-        <Link to="/downloads" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/downloads' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
-          <Download size={20} color={location.pathname === '/downloads' ? 'var(--neon-blue)' : 'currentColor'} />
-          Downloads
-        </Link>
-        <Link to="/admin/upload" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/upload' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s', marginTop: '1rem' }}>
-          <Settings size={20} />
-          Manage Library
-        </Link>
+        {user ? (
+          <>
+            <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2rem', marginBottom: '0.5rem' }}>Library</p>
+            
+            <Link to="/favorites" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/favorites' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+              <Heart size={20} fill={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'none'} color={location.pathname === '/favorites' ? 'var(--neon-pink)' : 'currentColor'} />
+              Favorites
+            </Link>
+            <Link to="/playlists" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/playlists' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+              <Library size={20} color={location.pathname === '/playlists' ? 'var(--neon-blue)' : 'currentColor'} />
+              Playlists
+            </Link>
+            <Link to="/downloads" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/downloads' ? 'var(--text-primary)' : 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, transition: 'color 0.3s' }}>
+              <Download size={20} color={location.pathname === '/downloads' ? 'var(--neon-blue)' : 'currentColor'} />
+              Downloads
+            </Link>
+            <Link to="/admin/upload" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: location.pathname === '/admin/upload' ? 'var(--neon-pink)' : 'var(--text-secondary)', textDecoration: 'none', transition: 'color 0.3s', marginTop: '1rem' }}>
+              <Settings size={20} />
+              Manage Library
+            </Link>
+          </>
+        ) : (
+          <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--neon-purple)', textDecoration: 'none', fontWeight: 600, transition: 'color 0.3s', marginTop: '2rem' }}>
+            <LogIn size={20} />
+            Sign In
+          </Link>
+        )}
       </nav>
     </aside>
   );

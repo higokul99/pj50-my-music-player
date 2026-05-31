@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Player from './components/Player';
@@ -15,7 +15,26 @@ import Downloads from './pages/Downloads';
 import Profile from './pages/Profile';
 import SongManagement from './pages/SongManagement';
 import { PlayerProvider } from './context/PlayerContext';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Loader2 } from 'lucide-react';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Loader2 className="animate-spin" size={48} color="var(--neon-purple)" />
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 function App() {
   return (
@@ -29,7 +48,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/*" element={
-            <>
+            <ProtectedRoute>
               <Sidebar />
               <main className="main-content">
                 <Header />
@@ -49,7 +68,7 @@ function App() {
               </main>
               <Player />
               <BottomNav />
-            </>
+            </ProtectedRoute>
           } />
         </Routes>
       </div>
