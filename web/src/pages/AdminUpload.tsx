@@ -164,13 +164,6 @@ const AdminUpload: React.FC = () => {
       </p>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '2rem', margin: 0 }}>Library Management</h2>
-        <button 
-          onClick={() => navigate('/admin/songs')}
-          className="btn-glass-3d" 
-          style={{ padding: '10px 20px', fontSize: '0.9rem', borderColor: 'var(--neon-pink)' }}
-        >
-          <List size={18} style={{ marginRight: '8px' }} /> Manage Uploaded Songs
-        </button>
       </div>
 
       <div className="admin-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
