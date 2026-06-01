@@ -1,15 +1,17 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { Music, Disc, Info, Heart, ListMusic } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 
 const RightPanel: React.FC = () => {
   const { currentSong, isPlaying, toggleFavorite } = usePlayer();
+  const location = useLocation();
 
   const baseURL = import.meta.env.MODE === 'production' 
     ? window.location.origin 
     : 'http://localhost:8000';
 
-  if (!currentSong) {
+  if (location.pathname === '/admin/upload' || !currentSong) {
     return null;
   }
 
