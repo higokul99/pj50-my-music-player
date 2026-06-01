@@ -26,7 +26,7 @@ class StoreSongRequest extends FormRequest
             'title' => 'required|string|max:255',
             'artist_id' => 'nullable|exists:artists,id',
             'album_id' => 'nullable|exists:albums,id',
-            'song_file' => 'required|file|mimes:mp3,wav,m4a,aac,oga,ogg,mpga|max:51200',
+            'song_file' => 'required|file|mimes:mp3,wav,m4a,aac,oga,ogg,mpga,mp4,m4b|max:51200',
             'cover_image' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:2048',
             'duration' => 'nullable|integer',
             'lyrics' => 'nullable|string',
