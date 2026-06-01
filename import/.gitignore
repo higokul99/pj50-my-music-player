@@ -1,0 +1,8 @@
+# Local executables and binaries
+bin/
+
+# Downloaded music playlist folder
+playlist/
+
+# Custom URL links file
+links.txt
