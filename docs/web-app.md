@@ -19,6 +19,7 @@ Features
 - Offline Playback (Cache API Audio)
 - Song Cloning (Add to personal collection from global)
 - Infinite Scrolling (Intersection Observer)
+- Dashboard & Playlist Shuffle Play (Randomized queue generation)
 
 Admin Features
 
@@ -40,5 +41,6 @@ Admin Features
 ### Key Components
 - **Header**: Personalized topbar with user's name and profile link.
 - **Sidebar**: High-level navigation for Discovery and Library.
+- **RightPanel**: Now Playing sidebar that displays cover art (or spinning vinyl record animation if no artwork is available), active state, and detailed song credits. Hides automatically when no song is active.
 - **Player**: Global audio controller with progress tracking and volume control.
 - **SongManagement**: Admin interface for full library control.

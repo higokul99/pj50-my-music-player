@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Music, Trash2, ArrowLeft, Download, CheckCircle, Loader2 } from 'lucide-react';
+import { Play, Music, Trash2, ArrowLeft, Download, CheckCircle, Loader2, Shuffle } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 
@@ -10,6 +10,19 @@ const PlaylistDetail: React.FC = () => {
   const [playlist, setPlaylist] = useState<any>(null);
   const [songs, setSongs] = useState<any[]>([]);
   const { playSong, currentSong, isPlaying, downloadSong, isDownloaded, isDownloading } = usePlayer();
+
+  const handleShufflePlay = () => {
+    if (songs.length === 0) return;
+    
+    // Create a copy of the songs array and shuffle it using Fisher-Yates algorithm
+    const shuffledSongs = [...songs];
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
+    }
+    
+    playSong(shuffledSongs[0], shuffledSongs);
+  };
 
   const fetchPlaylistDetail = async () => {
     try {
@@ -62,9 +75,19 @@ const PlaylistDetail: React.FC = () => {
               className="btn-glass-3d blue play-all-btn"
               onClick={() => songs.length > 0 && playSong(songs[0], songs)}
               disabled={songs.length === 0}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}
             >
-              <Play fill="white" size={24} />
+              <Play fill="white" size={20} />
               Play All
+            </button>
+            <button 
+              className="btn-glass-3d purple play-all-btn"
+              onClick={handleShufflePlay}
+              disabled={songs.length === 0}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}
+            >
+              <Shuffle size={20} />
+              Shuffle
             </button>
             <p className="song-count-label">{songs.length} songs</p>
           </div>

@@ -83,10 +83,11 @@ const Playlists: React.FC = () => {
           <Library size={48} opacity={0.2} style={{ marginBottom: '1rem' }} />
           <p style={{ color: 'var(--text-secondary)' }}>You haven't created any playlists yet.</p>
           <button 
-            className="btn-link" 
+            className="btn-glass-3d blue" 
             onClick={() => setShowCreateModal(true)}
-            style={{ marginTop: '1rem', color: 'var(--neon-blue)', cursor: 'pointer' }}
+            style={{ marginTop: '1.5rem', padding: '10px 24px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}
           >
+            <Plus size={20} />
             Create your first playlist
           </button>
         </div>
