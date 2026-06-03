@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, Mic2, Maximize2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Mic2, Maximize2, Music } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import FullscreenPlayer from './FullscreenPlayer';
 
@@ -30,12 +30,32 @@ const Player: React.FC = () => {
     <>
       <div className="player-bar" onClick={handleOpenFullscreen} style={{ cursor: currentSong ? 'pointer' : 'default' }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ width: 56, height: 56, background: '#1a1a1a', borderRadius: 2, overflow: 'hidden', flexShrink: 0 }}>
-            {currentSong?.cover_image && (
+          <div style={{ 
+            width: 56, 
+            height: 56, 
+            background: '#141416', 
+            borderRadius: '50%', 
+            overflow: 'hidden', 
+            flexShrink: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '1.5px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.4)',
+            transition: 'transform 0.5s ease'
+          }}
+          className={isPlaying && !currentSong?.cover_image ? 'animate-spin' : ''}
+          >
+            {currentSong?.cover_image ? (
               <img 
                 src={`http://localhost:8000${currentSong.cover_image}`} 
                 alt={currentSong.title} 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              <Music 
+                size={22} 
+                color="var(--neon-blue)" 
               />
             )}
           </div>

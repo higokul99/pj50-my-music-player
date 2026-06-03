@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Play, Music, Heart, ListPlus, Library, Loader2, Download, CheckCircle, User } from 'lucide-react';
+import { Play, Music, Heart, ListPlus, Library, Loader2, Download, CheckCircle, User, Shuffle } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,19 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading } = usePlayer();
   const { user } = useAuth();
+
+  const handleShufflePlay = () => {
+    if (songs.length === 0) return;
+    
+    // Create a copy of the songs array and shuffle it using Fisher-Yates algorithm
+    const shuffledSongs = [...songs];
+    for (let i = shuffledSongs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
+    }
+    
+    playSong(shuffledSongs[0], shuffledSongs);
+  };
   
   const observer = useRef<IntersectionObserver | null>(null);
   const lastSongElementRef = useCallback((node: HTMLDivElement) => {
@@ -116,14 +129,24 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ marginTop: '2.5rem' }}>
+          <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem' }}>
             <button 
               className="btn-glass-3d purple"
               onClick={() => songs.length > 0 && playSong(songs[0], songs)}
               disabled={songs.length === 0}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}
             >
               <Play fill="currentColor" size={18} />
               Play All
+            </button>
+            <button 
+              className="btn-glass-3d blue"
+              onClick={handleShufflePlay}
+              disabled={songs.length === 0}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}
+            >
+              <Shuffle size={18} />
+              Shuffle
             </button>
           </div>
         </div>

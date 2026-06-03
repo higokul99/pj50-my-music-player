@@ -14,6 +14,7 @@ import PlaylistDetail from './pages/PlaylistDetail';
 import Downloads from './pages/Downloads';
 import Profile from './pages/Profile';
 import SongManagement from './pages/SongManagement';
+import RightPanel from './components/RightPanel';
 import { PlayerProvider } from './context/PlayerContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -66,6 +67,7 @@ function App() {
                   </Routes>
                 </div>
               </main>
+              <RightPanel />
               <Player />
               <BottomNav />
             </ProtectedRoute>
