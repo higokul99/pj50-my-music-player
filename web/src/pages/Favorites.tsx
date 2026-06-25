@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Heart, Music, ListPlus, Download, CheckCircle, Loader2 } from 'lucide-react';
+import { Heart, Music, ListPlus, Download, CheckCircle, Loader2, ArrowRightCircle, PlusSquare } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 
 const Favorites: React.FC = () => {
   const [favoriteSongs, setFavoriteSongs] = useState<any[]>([]);
-  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading } = usePlayer();
+  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading, playSongNext, addSongToQueue } = usePlayer();
 
   const fetchFavorites = async () => {
     try {
@@ -99,8 +99,23 @@ const Favorites: React.FC = () => {
                   )}
                 </button>
                 <button
+                  onClick={(e) => { e.stopPropagation(); addSongToQueue(song); }}
+                  className="action-icon-btn"
+                  title="Add to Queue"
+                >
+                  <PlusSquare size={20} />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); playSongNext(song); }}
+                  className="action-icon-btn"
+                  title="Play Next"
+                >
+                  <ArrowRightCircle size={20} />
+                </button>
+                <button
                   onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}
                   className="action-icon-btn"
+                  title="Add to Playlist"
                 >
                   <ListPlus size={20} />
                 </button>

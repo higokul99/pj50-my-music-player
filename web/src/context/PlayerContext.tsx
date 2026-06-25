@@ -30,6 +30,13 @@ interface PlayerContextType {
   downloadSong: (song: Song) => Promise<void>;
   isDownloaded: (songId: number) => boolean;
   isDownloading: (songId: number) => boolean;
+  repeatMode: 'off' | 'all' | 'one';
+  isShuffleOn: boolean;
+  toggleRepeat: () => void;
+  toggleShuffle: () => void;
+  addSongToQueue: (song: Song) => void;
+  playSongNext: (song: Song) => void;
+  queue: Song[];
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -46,7 +53,77 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [songPlaylistIds, setSongPlaylistIds] = useState<number[]>([]);
   const [downloadedSongIds, setDownloadedSongIds] = useState<number[]>([]);
   const [downloadingIds, setDownloadingIds] = useState<number[]>([]);
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
+  const [isShuffleOn, setIsShuffleOn] = useState(false);
+  const [shuffledQueue, setShuffledQueue] = useState<Song[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Helper to shuffle array
+  const shuffleArray = (array: Song[]) => {
+    const newArr = [...array];
+    for (let i = newArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+  };
+
+  const toggleRepeat = useCallback(() => {
+    setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
+  }, []);
+
+  const toggleShuffle = useCallback(() => {
+    setIsShuffleOn(prev => {
+      const newState = !prev;
+      if (newState) {
+        // If turning on, generate shuffled queue
+        let newShuffled = shuffleArray(queue);
+        // Ensure current song is first in shuffled queue so it doesn't repeat immediately
+        if (currentSong) {
+          newShuffled = newShuffled.filter(s => s.id !== currentSong.id);
+          newShuffled.unshift(currentSong);
+        }
+        setShuffledQueue(newShuffled);
+      }
+      return newState;
+    });
+  }, [queue, currentSong]);
+
+  const addSongToQueue = useCallback((song: Song) => {
+    setQueue(prev => {
+      const exists = prev.find(s => s.id === song.id);
+      if (exists) return prev;
+      const newQueue = [...prev, song];
+      if (isShuffleOn) {
+        setShuffledQueue(sq => [...sq, song]);
+      }
+      return newQueue;
+    });
+  }, [isShuffleOn]);
+
+  const playSongNext = useCallback((song: Song) => {
+    setQueue(prev => {
+      const activeQueue = prev;
+      const currentIndex = currentSong ? activeQueue.findIndex(s => s.id === currentSong.id) : -1;
+      const filtered = activeQueue.filter(s => s.id !== song.id);
+      if (currentIndex !== -1) {
+        filtered.splice(currentIndex + 1, 0, song);
+        return filtered;
+      }
+      return [...filtered, song];
+    });
+    if (isShuffleOn) {
+      setShuffledQueue(prev => {
+        const currentIndex = currentSong ? prev.findIndex(s => s.id === currentSong.id) : -1;
+        const filtered = prev.filter(s => s.id !== song.id);
+        if (currentIndex !== -1) {
+          filtered.splice(currentIndex + 1, 0, song);
+          return filtered;
+        }
+        return [...filtered, song];
+      });
+    }
+  }, [currentSong, isShuffleOn]);
 
   // Initialize downloads list
   useEffect(() => {
@@ -156,6 +233,12 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const playSong = useCallback(async (song: Song, newQueue?: Song[]) => {
     if (newQueue) {
       setQueue(newQueue);
+      if (isShuffleOn) {
+        let newShuffled = shuffleArray(newQueue);
+        newShuffled = newShuffled.filter(s => s.id !== song.id);
+        newShuffled.unshift(song);
+        setShuffledQueue(newShuffled);
+      }
     }
     
     if (audioRef.current) {
@@ -184,34 +267,75 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           });
       }
     }
-  }, [currentSong]);
+  }, [currentSong, isShuffleOn]);
+
+  const playShuffled = useCallback((newQueue: Song[]) => {
+    if (newQueue.length === 0) return;
+    setIsShuffleOn(true);
+    let newShuffled = shuffleArray(newQueue);
+    setQueue(newQueue);
+    setShuffledQueue(newShuffled);
+    playSong(newShuffled[0]);
+  }, [playSong]);
 
   // Play next song in the queue
   const playNext = useCallback(() => {
-    if (queue.length === 0 || !currentSong) return;
+    const activeQueue = isShuffleOn ? shuffledQueue : queue;
+    if (activeQueue.length === 0 || !currentSong) return;
     
-    const currentIndex = queue.findIndex(s => s.id === currentSong.id);
-    if (currentIndex === -1) {
-      // If current song isn't in queue, just play the first song
-      playSong(queue[0]);
-    } else {
-      const nextIndex = (currentIndex + 1) % queue.length;
-      playSong(queue[nextIndex]);
+    if (repeatMode === 'one') {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(console.error);
+      }
+      return;
     }
-  }, [queue, currentSong, playSong]);
+
+    const currentIndex = activeQueue.findIndex(s => s.id === currentSong.id);
+    if (currentIndex === -1) {
+      playSong(activeQueue[0]);
+    } else {
+      const isLastSong = currentIndex === activeQueue.length - 1;
+      if (isLastSong && repeatMode === 'off') {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+          audioRef.current.currentTime = 0;
+        }
+        return;
+      }
+      const nextIndex = (currentIndex + 1) % activeQueue.length;
+      playSong(activeQueue[nextIndex]);
+    }
+  }, [queue, shuffledQueue, isShuffleOn, repeatMode, currentSong, playSong]);
 
   // Play previous song in the queue
   const playPrevious = useCallback(() => {
-    if (queue.length === 0 || !currentSong) return;
+    const activeQueue = isShuffleOn ? shuffledQueue : queue;
+    if (activeQueue.length === 0 || !currentSong) return;
     
-    const currentIndex = queue.findIndex(s => s.id === currentSong.id);
-    if (currentIndex === -1) {
-      playSong(queue[0]);
-    } else {
-      const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
-      playSong(queue[prevIndex]);
+    // If we've played more than 3 seconds, just restart the song regardless of mode
+    if (audioRef.current && audioRef.current.currentTime > 3) {
+      audioRef.current.currentTime = 0;
+      return;
     }
-  }, [queue, currentSong, playSong]);
+
+    if (repeatMode === 'one') {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(console.error);
+      }
+      return;
+    }
+
+    const currentIndex = activeQueue.findIndex(s => s.id === currentSong.id);
+    if (currentIndex === -1) {
+      playSong(activeQueue[0]);
+    } else {
+      const prevIndex = (currentIndex - 1 + activeQueue.length) % activeQueue.length;
+      playSong(activeQueue[prevIndex]);
+    }
+  }, [queue, shuffledQueue, isShuffleOn, repeatMode, currentSong, playSong]);
 
   // Audio initialization and event listeners
   useEffect(() => {
@@ -241,7 +365,7 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [playNext, volume]); // Added playNext as dependency for the auto-play listener
+  }, [playNext, volume]);
 
   const togglePlayPause = () => {
     if (!audioRef.current || !currentSong) return;
@@ -285,6 +409,14 @@ export const PlayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         downloadSong,
         isDownloaded,
         isDownloading,
+        repeatMode,
+        isShuffleOn,
+        toggleRepeat,
+        toggleShuffle,
+        addSongToQueue,
+        playSongNext,
+        playShuffled,
+        queue,
       }}
     >
       {children}

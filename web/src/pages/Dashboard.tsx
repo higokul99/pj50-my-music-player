@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Play, Music, Heart, ListPlus, Library, Loader2, Download, CheckCircle, User, Shuffle } from 'lucide-react';
+import { Play, Music, Heart, ListPlus, Library, Loader2, Download, CheckCircle, User, Shuffle, ArrowRightCircle, PlusSquare } from 'lucide-react';
 import api from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,20 +9,12 @@ const Dashboard: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { playSong, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading } = usePlayer();
+  const { playSong, playShuffled, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading, playSongNext, addSongToQueue } = usePlayer();
   const { user } = useAuth();
 
   const handleShufflePlay = () => {
     if (songs.length === 0) return;
-    
-    // Create a copy of the songs array and shuffle it using Fisher-Yates algorithm
-    const shuffledSongs = [...songs];
-    for (let i = shuffledSongs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledSongs[i], shuffledSongs[j]] = [shuffledSongs[j], shuffledSongs[i]];
-    }
-    
-    playSong(shuffledSongs[0], shuffledSongs);
+    playShuffled(songs);
   };
   
   const observer = useRef<IntersectionObserver | null>(null);
@@ -208,8 +200,23 @@ const Dashboard: React.FC = () => {
                     )}
                   </button>
                   <button
+                    onClick={(e) => { e.stopPropagation(); addSongToQueue(song); }}
+                    className="action-icon-btn"
+                    title="Add to Queue"
+                  >
+                    <PlusSquare size={20} />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); playSongNext(song); }}
+                    className="action-icon-btn"
+                    title="Play Next"
+                  >
+                    <ArrowRightCircle size={20} />
+                  </button>
+                  <button
                     onClick={(e) => { e.stopPropagation(); showAddToPlaylist(song.id); }}
                     className="action-icon-btn"
+                    title="Add to Playlist"
                   >
                     <ListPlus size={20} />
                   </button>

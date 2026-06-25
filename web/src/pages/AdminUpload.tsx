@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import * as mm from 'music-metadata-browser';
 import { List, Trash2, CheckCircle2, AlertCircle, RefreshCw, FolderOpen, Files, Plus } from 'lucide-react';
 
@@ -16,6 +17,7 @@ interface BulkFile {
 
 const AdminUpload: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [artists, setArtists] = useState<any[]>([]);
   const [albums, setAlbums] = useState<any[]>([]);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
@@ -33,13 +35,32 @@ const AdminUpload: React.FC = () => {
   // Bulk state
   const [bulkFiles, setBulkFiles] = useState<BulkFile[]>([]);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
+  const [createPlaylist, setCreatePlaylist] = useState(false);
+  const [playlistName, setPlaylistName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchArtists = async () => {
+  const fetchArtists = async (currentUser?: any) => {
     try {
       const res = await api.get('/artists');
-      setArtists(res.data.data);
+      const fetchedArtists = res.data.data;
+      setArtists(fetchedArtists);
+
+      if (currentUser) {
+        const userArtist = fetchedArtists.find((a: any) => a.name.toLowerCase() === currentUser.name.toLowerCase());
+        if (userArtist) {
+          setSongArtistId(userArtist.id.toString());
+        } else {
+          try {
+            const createRes = await api.post('/artists', { name: currentUser.name });
+            const newArtist = createRes.data.data;
+            setArtists([...fetchedArtists, newArtist]);
+            setSongArtistId(newArtist.id.toString());
+          } catch (createErr) {
+            console.error('Failed to auto-create artist for user', createErr);
+          }
+        }
+      }
     } catch (e) {
       console.error(e);
     }
@@ -55,9 +76,11 @@ const AdminUpload: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchArtists();
-    fetchAlbums();
-  }, []);
+    if (user) {
+      fetchArtists(user);
+      fetchAlbums();
+    }
+  }, [user]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
@@ -137,7 +160,18 @@ const AdminUpload: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       setSongTitle('');
-      setSongArtistId('');
+      
+      if (user) {
+        const userArtist = artists.find((a: any) => a.name.toLowerCase() === user.name.toLowerCase());
+        if (userArtist) {
+          setSongArtistId(userArtist.id.toString());
+        } else {
+          setSongArtistId('');
+        }
+      } else {
+        setSongArtistId('');
+      }
+
       setSongAlbumId('');
       setSongFile(null);
       alert('Song Uploaded Successfully!');
@@ -171,7 +205,7 @@ const AdminUpload: React.FC = () => {
         id,
         file,
         title: fileNameTitle,
-        artistId: '',
+        artistId: songArtistId,
         albumId: '',
         status: 'parsing' as const
       };
@@ -185,7 +219,7 @@ const AdminUpload: React.FC = () => {
         const metadata = await mm.parseBlob(tempFile.file);
         const { title, artist, album } = metadata.common;
         
-        let artistId = '';
+        let artistId = songArtistId;
         let albumId = '';
 
         if (artist) {
@@ -241,6 +275,7 @@ const AdminUpload: React.FC = () => {
     setIsBulkUploading(true);
 
     const pendingFiles = bulkFiles.filter(f => f.status === 'pending' || f.status === 'error');
+    const uploadedSongIds: number[] = [];
 
     for (const bulkFile of pendingFiles) {
       setBulkFiles(prev => prev.map(f => f.id === bulkFile.id ? { ...f, status: 'uploading' } : f));
@@ -252,10 +287,13 @@ const AdminUpload: React.FC = () => {
       formData.append('song_file', bulkFile.file);
 
       try {
-        await api.post('/songs', formData, {
+        const res = await api.post('/songs', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setBulkFiles(prev => prev.map(f => f.id === bulkFile.id ? { ...f, status: 'success' } : f));
+        if (res.data?.data?.id) {
+          uploadedSongIds.push(res.data.data.id);
+        }
       } catch (err: any) {
         console.error('Bulk Upload Error for:', bulkFile.file.name, err);
         const errorData = err.response?.data;
@@ -265,6 +303,21 @@ const AdminUpload: React.FC = () => {
           errorMessage = `${errorMessage}: ${detail}`;
         }
         setBulkFiles(prev => prev.map(f => f.id === bulkFile.id ? { ...f, status: 'error', error: errorMessage } : f));
+      }
+    }
+
+    if (createPlaylist && uploadedSongIds.length > 0) {
+      try {
+        await api.post('/playlists', {
+          name: playlistName || `Bulk Upload - ${new Date().toLocaleDateString()}`,
+          song_ids: uploadedSongIds
+        });
+        alert(`Successfully created playlist with ${uploadedSongIds.length} songs!`);
+        setCreatePlaylist(false);
+        setPlaylistName('');
+      } catch (err) {
+        console.error('Playlist creation failed:', err);
+        alert('Songs uploaded, but failed to create the playlist.');
       }
     }
 
@@ -430,8 +483,8 @@ const AdminUpload: React.FC = () => {
       ) : (
         /* Bulk Uploader tab */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="glass-card" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+          <div className="glass-card" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'flex-start', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', gap: '1rem', width: '100%', alignItems: 'center' }}>
               <input 
                 type="file" 
                 multiple 
@@ -465,35 +518,62 @@ const AdminUpload: React.FC = () => {
               >
                 <FolderOpen size={18} /> Select Playlist Folder
               </button>
+
+              {bulkFiles.length > 0 && (
+                <div style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
+                  <button 
+                    onClick={handleClearFinished} 
+                    className="btn-glass-3d" 
+                    style={{ fontSize: '0.9rem', padding: '10px 16px', color: 'var(--text-secondary)' }}
+                  >
+                    Clear Completed
+                  </button>
+                  <button 
+                    onClick={handleBulkUpload} 
+                    disabled={isBulkUploading || bulkFiles.filter(f => f.status === 'pending' || f.status === 'error').length === 0}
+                    className="btn-glass-3d pink"
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '0.95rem' }}
+                  >
+                    {isBulkUploading ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" />
+                        Uploading Queue...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={18} />
+                        Upload All ({bulkFiles.filter(f => f.status === 'pending' || f.status === 'error').length} pending)
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             {bulkFiles.length > 0 && (
-              <div style={{ display: 'flex', gap: '1rem', marginLeft: 'auto' }}>
-                <button 
-                  onClick={handleClearFinished} 
-                  className="btn-glass-3d" 
-                  style={{ fontSize: '0.9rem', padding: '10px 16px', color: 'var(--text-secondary)' }}
-                >
-                  Clear Completed
-                </button>
-                <button 
-                  onClick={handleBulkUpload} 
-                  disabled={isBulkUploading || bulkFiles.filter(f => f.status === 'pending' || f.status === 'error').length === 0}
-                  className="btn-glass-3d pink"
-                  style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '0.95rem' }}
-                >
-                  {isBulkUploading ? (
-                    <>
-                      <RefreshCw size={18} className="animate-spin" />
-                      Uploading Queue...
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={18} />
-                      Upload All ({bulkFiles.filter(f => f.status === 'pending' || f.status === 'error').length} pending)
-                    </>
-                  )}
-                </button>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '8px', width: '100%' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={createPlaylist} 
+                    onChange={(e) => setCreatePlaylist(e.target.checked)}
+                    style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: 'var(--neon-pink)' }}
+                  />
+                  Save directly to a Playlist
+                </label>
+                {createPlaylist && (
+                  <input 
+                    type="text" 
+                    placeholder={`e.g. Bulk Upload - ${new Date().toLocaleDateString()}`}
+                    value={playlistName}
+                    onChange={(e) => setPlaylistName(e.target.value)}
+                    style={{ 
+                      flex: 1, padding: '8px 12px', background: 'rgba(0,0,0,0.5)', 
+                      border: '1px solid var(--neon-pink)', borderRadius: '4px', 
+                      color: 'white', fontSize: '0.9rem', outline: 'none' 
+                    }}
+                  />
+                )}
               </div>
             )}
           </div>

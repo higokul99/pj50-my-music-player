@@ -22,6 +22,7 @@ class SongService
         $songFile->storeAs('', $songFileName, 'songs');
         $data['file_path'] = $songFileName;
 
+        $coverFileName = null;
         // Store cover image in songs/covers/
         if ($coverImage) {
             $coverFileName = time() . '_' . Str::slug(pathinfo($coverImage->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $coverImage->getClientOriginalExtension();
@@ -29,7 +30,18 @@ class SongService
             $data['cover_image'] = "/storage/songs/covers/{$coverFileName}";
         }
 
-        return $this->songRepository->create($data);
+        try {
+            return $this->songRepository->create($data);
+        } catch (\Exception $e) {
+            // Cleanup files if database insert fails
+            if (Storage::disk('songs')->exists($songFileName)) {
+                Storage::disk('songs')->delete($songFileName);
+            }
+            if ($coverFileName && Storage::disk('public')->exists('songs/covers/' . $coverFileName)) {
+                Storage::disk('public')->delete('songs/covers/' . $coverFileName);
+            }
+            throw $e;
+        }
     }
 
     public function deleteSong($id)

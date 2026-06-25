@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Volume2, Mic2, Maximize2, Music } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, Mic2, Maximize2, Music, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 import FullscreenPlayer from './FullscreenPlayer';
 
 const Player: React.FC = () => {
-  const { currentSong, isPlaying, progress, duration, volume, togglePlayPause, setVolumeLevel, seek, playNext, playPrevious } = usePlayer();
+  const { currentSong, isPlaying, progress, duration, volume, togglePlayPause, setVolumeLevel, seek, playNext, playPrevious, repeatMode, isShuffleOn, toggleRepeat, toggleShuffle } = usePlayer();
   const [showFullscreen, setShowFullscreen] = useState(false);
 
   const formatTime = (time: number) => {
@@ -71,11 +71,17 @@ const Player: React.FC = () => {
         
         <div className="player-controls" onClick={(e) => e.stopPropagation()} style={{ flex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <button className="nav-btn-small" title="Shuffle" onClick={toggleShuffle} style={{ color: isShuffleOn ? 'var(--neon-blue)' : 'var(--text-secondary)' }}>
+              <Shuffle size={18} />
+            </button>
             <button className="nav-btn-small" title="Previous" onClick={playPrevious}><SkipBack size={20} /></button>
             <button className="btn-play" onClick={togglePlayPause} style={{ width: 44, height: 44 }}>
               {isPlaying ? <Pause fill="currentColor" size={18} /> : <Play fill="currentColor" size={18} style={{ marginLeft: 3 }} />}
             </button>
             <button className="nav-btn-small" title="Next" onClick={playNext}><SkipForward size={20} /></button>
+            <button className="nav-btn-small" title="Repeat" onClick={toggleRepeat} style={{ color: repeatMode !== 'off' ? 'var(--neon-pink)' : 'var(--text-secondary)' }}>
+              {repeatMode === 'one' ? <Repeat1 size={18} /> : <Repeat size={18} />}
+            </button>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', maxWidth: '500px' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', minWidth: '35px' }}>{formatTime(progress)}</span>

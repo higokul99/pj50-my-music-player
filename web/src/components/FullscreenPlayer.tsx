@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Play, Pause, SkipBack, SkipForward, Heart, ListPlus, Volume2 } from 'lucide-react';
+import { X, Play, Pause, SkipBack, SkipForward, Heart, ListPlus, Volume2, Shuffle, Repeat, Repeat1 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 
 interface FullscreenPlayerProps {
@@ -7,7 +7,7 @@ interface FullscreenPlayerProps {
 }
 
 const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
-  const { currentSong, isPlaying, progress, duration, togglePlayPause, seek, volume, setVolumeLevel, toggleFavorite, playNext, playPrevious, showAddToPlaylist } = usePlayer();
+  const { currentSong, isPlaying, progress, duration, togglePlayPause, seek, volume, setVolumeLevel, toggleFavorite, playNext, playPrevious, showAddToPlaylist, isShuffleOn, repeatMode, toggleShuffle, toggleRepeat } = usePlayer();
 
   if (!currentSong) return null;
 
@@ -130,11 +130,17 @@ const FullscreenPlayer: React.FC<FullscreenPlayerProps> = ({ onClose }) => {
 
           {/* Controls */}
           <div className="main-playback-controls">
+            <button className="nav-btn" onClick={toggleShuffle} style={{ color: isShuffleOn ? 'var(--neon-blue)' : 'white' }}>
+              <Shuffle size={24} />
+            </button>
             <button className="nav-btn" onClick={playPrevious}><SkipBack size={40} fill="currentColor" /></button>
             <button className="play-pause-btn-large" onClick={togglePlayPause}>
               {isPlaying ? <Pause size={48} fill="currentColor" /> : <Play size={48} fill="currentColor" style={{ marginLeft: 6 }} />}
             </button>
             <button className="nav-btn" onClick={playNext}><SkipForward size={40} fill="currentColor" /></button>
+            <button className="nav-btn" onClick={toggleRepeat} style={{ color: repeatMode !== 'off' ? 'var(--neon-pink)' : 'white' }}>
+              {repeatMode === 'one' ? <Repeat1 size={24} /> : <Repeat size={24} />}
+            </button>
           </div>
 
           {/* Volume */}

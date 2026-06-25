@@ -26,6 +26,8 @@ class PlaylistController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'song_ids' => 'nullable|array',
+            'song_ids.*' => 'exists:songs,id'
         ]);
 
         $playlist = Playlist::create([
@@ -33,6 +35,19 @@ class PlaylistController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
         ]);
+
+        if (!empty($validated['song_ids'])) {
+            $songsData = [];
+            foreach (array_unique($validated['song_ids']) as $songId) {
+                $songsData[] = [
+                    'playlist_id' => $playlist->id,
+                    'song_id' => $songId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            PlaylistSong::insert($songsData);
+        }
 
         return $this->successResponse($playlist, 'Playlist created successfully', 201);
     }

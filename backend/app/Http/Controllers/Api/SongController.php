@@ -29,10 +29,13 @@ class SongController extends Controller
             $user = auth()->user();
             $query = $request->input('q');
 
-            $songs = \App\Models\Song::where(function($q) use ($user) {
+            $subQuery = \App\Models\Song::selectRaw('MAX(id) as id')
+                ->where(function($q) use ($user) {
                     $q->where('user_id', $user->id)
                       ->orWhereNull('user_id');
-                })
+                })->groupBy('file_path');
+
+            $songs = \App\Models\Song::whereIn('id', $subQuery)
                 ->when($query, function($q) use ($query) {
                     $q->where(function($sq) use ($query) {
                         $sq->where('title', 'like', "%{$query}%")
@@ -63,7 +66,10 @@ class SongController extends Controller
         try {
             $query = $request->input('q');
 
-            $songs = \App\Models\Song::with(['artist', 'album'])
+            $subQuery = \App\Models\Song::selectRaw('MIN(id) as id')->groupBy('file_path');
+
+            $songs = \App\Models\Song::whereIn('id', $subQuery)
+                ->with(['artist', 'album'])
                 ->when($query, function($q) use ($query) {
                     $q->where(function($sq) use ($query) {
                         $sq->where('title', 'like', "%{$query}%")
