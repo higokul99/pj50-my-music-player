@@ -36,6 +36,7 @@ interface PlayerContextType {
   toggleShuffle: () => void;
   addSongToQueue: (song: Song) => void;
   playSongNext: (song: Song) => void;
+  playShuffled: (newQueue: Song[]) => void;
   queue: Song[];
 }
 
