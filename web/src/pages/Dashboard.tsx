@@ -9,6 +9,12 @@ const Dashboard: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  
+  // Total statistics state
+  const [totalSongs, setTotalSongs] = useState(0);
+  const [totalArtists, setTotalArtists] = useState(0);
+  const [totalAlbums, setTotalAlbums] = useState(0);
+
   const { playSong, playShuffled, currentSong, isPlaying, toggleFavorite, showAddToPlaylist, downloadSong, isDownloaded, isDownloading, playSongNext, addSongToQueue } = usePlayer();
   const { user } = useAuth();
 
@@ -28,6 +34,19 @@ const Dashboard: React.FC = () => {
     });
     if (node) observer.current.observe(node);
   }, [loading, hasMore]);
+
+  const fetchStats = async () => {
+    try {
+      const [artistsRes, albumsRes] = await Promise.all([
+        api.get('/artists'),
+        api.get('/albums')
+      ]);
+      setTotalArtists(artistsRes.data.data?.length || 0);
+      setTotalAlbums(albumsRes.data.data?.length || 0);
+    } catch (e) {
+      console.error('Failed to fetch stats', e);
+    }
+  };
 
   const fetchSongs = async (pageNum: number) => {
     setLoading(true);
@@ -55,6 +74,9 @@ const Dashboard: React.FC = () => {
         return Array.from(new Map(combined.map(item => [item.id, item])).values());
       });
       
+      if (pageNum === 1) {
+        setTotalSongs(meta?.total || newData.length);
+      }
       setHasMore(meta.current_page < meta.last_page);
     } catch (error) {
       console.error('Failed to fetch songs', error);
@@ -63,6 +85,10 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   useEffect(() => {
     fetchSongs(page);
@@ -97,7 +123,7 @@ const Dashboard: React.FC = () => {
                 <Music size={24} />
               </div>
               <div>
-                <span className="stat-value">{songs.length}</span>
+                <span className="stat-value">{totalSongs}</span>
                 <span className="stat-label">Tracks</span>
               </div>
             </div>
@@ -106,7 +132,7 @@ const Dashboard: React.FC = () => {
                 <User size={24} />
               </div>
               <div>
-                <span className="stat-value">{new Set(songs.map(s => s.artist_id)).size}</span>
+                <span className="stat-value">{totalArtists}</span>
                 <span className="stat-label">Artists</span>
               </div>
             </div>
@@ -115,7 +141,7 @@ const Dashboard: React.FC = () => {
                 <Library size={24} />
               </div>
               <div>
-                <span className="stat-value">{new Set(songs.map(s => s.album_id)).size}</span>
+                <span className="stat-value">{totalAlbums}</span>
                 <span className="stat-label">Albums</span>
               </div>
             </div>

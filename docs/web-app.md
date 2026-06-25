@@ -43,4 +43,4 @@ Admin Features
 - **Sidebar**: High-level navigation for Discovery and Library.
 - **RightPanel**: Now Playing sidebar that displays cover art (or spinning vinyl record animation if no artwork is available), active state, and detailed song credits. Hides automatically when no song is active.
 - **Player**: Global audio controller with progress tracking and volume control.
-- **SongManagement**: Admin interface for full library control.
+- **SongManagement**: Admin interface for full library control, featuring server-side pagination and live search queries.

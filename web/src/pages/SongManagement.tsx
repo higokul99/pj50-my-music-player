@@ -11,6 +11,11 @@ const SongManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalSongs, setTotalSongs] = useState(0);
+  
   // Edit Modal State
   const [editingSong, setEditingSong] = useState<any | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -19,29 +24,57 @@ const SongManagement: React.FC = () => {
   const [editGenre, setEditGenre] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchStaticData = async () => {
     try {
-      const [songsRes, artistsRes, albumsRes] = await Promise.all([
-        api.get('/songs'),
+      const [artistsRes, albumsRes] = await Promise.all([
         api.get('/artists'),
         api.get('/albums')
       ]);
-      // Note: Backend might return paginated data for /songs now
-      const songData = songsRes.data.data.data || songsRes.data.data;
-      setSongs(songData);
       setArtists(artistsRes.data.data);
       setAlbums(albumsRes.data.data);
     } catch (error) {
-      console.error('Failed to fetch data', error);
+      console.error('Failed to fetch static data', error);
+    }
+  };
+
+  const fetchSongs = async () => {
+    setLoading(true);
+    try {
+      const songsRes = await api.get('/songs', {
+        params: {
+          page: page,
+          q: searchTerm || undefined
+        }
+      });
+      const responseData = songsRes.data.data;
+      if (responseData && responseData.data) {
+        setSongs(responseData.data);
+        setTotalPages(responseData.meta?.last_page || 1);
+        setTotalSongs(responseData.meta?.total || responseData.data.length);
+      } else {
+        setSongs(responseData || []);
+        setTotalPages(1);
+        setTotalSongs(responseData?.length || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch songs', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchStaticData();
   }, []);
+
+  useEffect(() => {
+    fetchSongs();
+  }, [page, searchTerm]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPage(1); // Reset to page 1 on new search query
+  };
 
   const handleEditClick = (song: any) => {
     setEditingSong(song);
@@ -65,7 +98,7 @@ const SongManagement: React.FC = () => {
       });
       alert('Song updated successfully');
       setEditingSong(null);
-      fetchData(); // Refresh list
+      fetchSongs(); // Refresh list
     } catch (error) {
       console.error('Update failed', error);
       alert('Failed to update song');
@@ -82,7 +115,7 @@ const SongManagement: React.FC = () => {
     try {
       await api.delete(`/songs/${songId}`);
       alert('Song deleted from cloud');
-      setSongs(songs.filter(s => s.id !== songId));
+      fetchSongs(); // Refresh list to get updated count and next page if current becomes empty
     } catch (error) {
       console.error('Delete failed', error);
       alert('Failed to delete song');
@@ -118,7 +151,7 @@ const SongManagement: React.FC = () => {
           <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} size={18} />
           <input 
             type="text" placeholder="Search your tracks..." 
-            value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm} onChange={handleSearchChange}
             style={{ ...inputStyle, marginBottom: 0, paddingLeft: '40px', background: 'rgba(255,255,255,0.03)' }}
           />
         </div>
@@ -137,10 +170,10 @@ const SongManagement: React.FC = () => {
           <tbody>
             {loading ? (
               <tr><td colSpan={4} style={{ padding: '4rem', textAlign: 'center' }}>Loading your tracks...</td></tr>
-            ) : filteredSongs.length === 0 ? (
+            ) : songs.length === 0 ? (
               <tr><td colSpan={4} style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No songs found.</td></tr>
             ) : (
-              filteredSongs.map(song => (
+              songs.map(song => (
                 <tr key={song.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 0.2s' }}>
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -175,6 +208,52 @@ const SongManagement: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            Showing page <strong>{page}</strong> of <strong>{totalPages}</strong> ({totalSongs} total songs)
+          </span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              disabled={page === 1}
+              onClick={() => setPage(p => Math.max(p - 1, 1))}
+              className="pagination-btn"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--border-subtle)',
+                color: page === 1 ? 'var(--text-secondary)' : 'white',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: page === 1 ? 'default' : 'pointer',
+                opacity: page === 1 ? 0.5 : 1,
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Previous
+            </button>
+            <button 
+              disabled={page === totalPages}
+              onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+              className="pagination-btn"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--border-subtle)',
+                color: page === totalPages ? 'var(--text-secondary)' : 'white',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: page === totalPages ? 'default' : 'pointer',
+                opacity: page === totalPages ? 0.5 : 1,
+                fontSize: '0.9rem',
+                transition: 'all 0.2s'
+              }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingSong && (
@@ -236,6 +315,11 @@ const SongManagement: React.FC = () => {
           background: rgba(255,255,255,0.1);
           color: white;
           transform: translateY(-2px);
+        }
+        .pagination-btn:hover:not(:disabled) {
+          background: rgba(255,255,255,0.15) !important;
+          border-color: rgba(255,255,255,0.5) !important;
+          transform: translateY(-1px);
         }
         th { text-align: left; }
       `}</style>
